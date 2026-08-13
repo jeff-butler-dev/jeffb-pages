@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watchlist, Reading List &amp; Games — Ranked</title>
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0a0c10; --panel:#12161d; --panel2:#171c25; --line:#242c38; --line2:#2f3947;
+    --text:#e9edf2; --dim:#8b95a3; --dim2:#646e7c;
+    --cy:#3ad8e0; --mg:#e8659b; --am:#e8b25c; --gr:#7fd39b; --vi:#a68ce8;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;background:#0a0c10;min-height:100%}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--cy);text-decoration:none}
+  input,select,button,textarea{color-scheme:dark}
+  ::selection{background:rgba(58,216,224,.3)}
+  ::-webkit-scrollbar{width:11px;height:11px}
+  ::-webkit-scrollbar-track{background:#0d1016}
+  ::-webkit-scrollbar-thumb{background:#2b3542;border-radius:99px;border:2px solid #0d1016}
+  ::-webkit-scrollbar-thumb:hover{background:#3a4655}
+
+  header{padding:34px 0 22px;border-bottom:1px solid var(--line);
+    background:radial-gradient(900px 220px at 12% 0%,rgba(58,216,224,.10),transparent 70%),
+               radial-gradient(700px 200px at 88% 0%,rgba(232,101,155,.09),transparent 70%),#0d1117;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+  h1{margin:0 0 8px;font-size:27px;letter-spacing:-.4px}
+  h1 span{color:var(--cy)}
+  .sub{margin:0;color:var(--dim);font-size:14px;max-width:820px}
+
+  /* progress */
+  .prog{display:flex;align-items:center;gap:14px;margin-top:20px;flex-wrap:wrap}
+  .bar{flex:1;min-width:180px;height:6px;background:#1c232e;border-radius:99px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;border-radius:99px;
+    background:linear-gradient(90deg,var(--cy),var(--mg));transition:width .35s ease}
+  .pnum{font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .btn{background:var(--panel2);border:1px solid var(--line2);color:var(--dim);
+    padding:6px 12px;border-radius:6px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:.15s}
+  .btn:hover{color:var(--text);border-color:var(--cy)}
+
+  /* toolbar */
+  .tools{position:sticky;top:0;z-index:20;background:rgba(10,12,16,.93);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:12px 0}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .row + .row{margin-top:10px}
+  input[type=search]{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line2);
+    color:var(--text);padding:9px 13px;border-radius:7px;font:14px inherit;font-family:inherit}
+  input[type=search]:focus{outline:none;border-color:var(--cy)}
+  select{background:var(--panel);border:1px solid var(--line2);color:var(--text);
+    padding:9px 10px;border-radius:7px;font:13.5px inherit;font-family:inherit;cursor:pointer}
+  select:focus{outline:none;border-color:var(--cy)}
+  .seg{display:flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden}
+  .seg button{background:var(--panel);border:0;border-right:1px solid var(--line2);color:var(--dim);
+    padding:9px 15px;font:13.5px inherit;font-family:inherit;cursor:pointer;transition:.15s}
+  .seg button:last-child{border-right:0}
+  .seg button:hover{color:var(--text)}
+  .seg button.on{background:var(--cy);color:#07242a;font-weight:650}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{background:transparent;border:1px solid var(--line2);color:var(--dim2);
+    padding:5px 11px;border-radius:99px;font:12.5px inherit;font-family:inherit;cursor:pointer;transition:.15s}
+  .chip:hover{color:var(--text);border-color:var(--dim)}
+  .chip.on{background:rgba(58,216,224,.13);border-color:var(--cy);color:var(--cy)}
+  .toggle{display:flex;align-items:center;gap:7px;color:var(--dim);font-size:13px;cursor:pointer;user-select:none}
+  .toggle input{accent-color:var(--cy);width:15px;height:15px;cursor:pointer}
+  .count{color:var(--dim2);font-size:12.5px;margin-left:auto;white-space:nowrap}
+
+  /* callout */
+  .gaps{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--am);
+    border-radius:7px;padding:14px 18px;margin:22px 0 4px;font-size:13.5px;color:var(--dim)}
+  .gaps b{color:var(--text);display:block;margin-bottom:6px}
+  .gaps code{background:#0f1319;border:1px solid var(--line);border-radius:4px;
+    padding:1.5px 6px;font-size:12.5px;color:var(--am);font-family:ui-monospace,Menlo,monospace}
+
+  /* sections */
+  h2{margin:38px 0 3px;font-size:18px;display:flex;align-items:baseline;gap:10px}
+  h2 em{font-style:normal;color:var(--dim2);font-size:13px;font-weight:400}
+  .snote{margin:0 0 14px;color:var(--dim);font-size:13px}
+
+  /* cards */
+  .grid{display:grid;gap:9px}
+  .card{display:grid;grid-template-columns:34px 40px 1fr auto;gap:14px;align-items:start;
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 15px;transition:.15s}
+  .card:hover{border-color:var(--line2);background:var(--panel2)}
+  .card.done{opacity:.42}
+  .card.done .ti{text-decoration:line-through}
+  .card.hot{border-left:3px solid var(--cy);padding-left:12px}
+  .ck{padding-top:2px}
+  .ck input{accent-color:var(--cy);width:17px;height:17px;cursor:pointer}
+  .sc{text-align:center;padding-top:1px}
+  .sc b{display:block;font-size:15px;font-variant-numeric:tabular-nums;line-height:1.1}
+  .sc small{font-size:9.5px;letter-spacing:.06em;color:var(--dim2);text-transform:uppercase}
+  .s90 b{color:var(--cy)} .s80 b{color:var(--gr)} .s70 b{color:var(--am)} .s60 b{color:var(--dim)}
+  .ti{font-weight:620;font-size:15px}
+  .yr{color:var(--dim2);font-weight:400;font-size:13px;margin-left:6px}
+  .why{color:var(--dim);font-size:13.2px;margin-top:3px}
+  .tg{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+  .tg span{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim2);
+    border:1px solid var(--line2);border-radius:4px;padding:1.5px 6px}
+  .tg span.k{color:var(--mg);border-color:rgba(232,101,155,.4)}
+  .go{align-self:center;background:var(--panel2);border:1px solid var(--line2);border-radius:6px;
+    padding:7px 13px;font-size:12.5px;white-space:nowrap;transition:.15s}
+  .go:hover{border-color:var(--cy);background:rgba(58,216,224,.1)}
+  .empty{color:var(--dim2);text-align:center;padding:50px 20px;font-size:14px}
+
+  footer{color:var(--dim2);font-size:12px;text-align:center;padding:34px 22px 60px;
+    border-top:1px solid var(--line);margin-top:52px}
+
+  @media(max-width:700px){
+    .card{grid-template-columns:30px 1fr;gap:10px}
+    .sc{display:none} .go{grid-column:2;justify-self:start;margin-top:8px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Watchlist, Reading List &amp; Games — <span>ranked for you</span></h1>
+    <p class="sub">Built from your library, then re-weighted around what you said you loved:
+      <b style="color:var(--mg)">Blade Runner 2049</b>, <b style="color:var(--mg)">Cyberpunk: Edgerunners</b>, and
+      <b style="color:var(--mg)">early Love, Death &amp; Robots</b>, and <b style="color:var(--mg)">Dispatch</b>.
+      Character-first genre stories, adult animation, team chemistry, sharp comedy, and choices with consequences
+      now carry extra weight. Horror is removed, Black Mirror-style cautionary anthologies are down-weighted, and
+      everything you've seen or read is gone.</p>
+    <p class="sub" style="margin-top:10px;color:var(--dim2);font-size:13px">
+      Reading of your taste: you want <b style="color:var(--dim)">worlds, characters, and a crew worth spending time with</b>,
+      not just thought experiments. Dispatch adds a clear signal for witty adult genre fiction, workplace/team dynamics,
+      and decisions that make relationships matter; Black Mirror's premise-then-punchline structure is still the part that didn't.</p>
+    <div class="prog">
+      <span class="pnum" id="pTxt">0 of 0 done</span>
+      <span class="bar"><i id="pBar"></i></span>
+      <button class="btn" id="expBtn">Export backup</button>
+      <button class="btn" id="impBtn">Import</button>
+      <button class="btn" id="resetBtn">Reset</button>
+      <input type="file" id="impFile" accept=".json" hidden>
+    </div>
+    <p id="saveState" style="margin:9px 0 0;font-size:12px"></p>
+  </div>
+</header>
+
+<div class="tools">
+  <div class="wrap">
+    <div class="row">
+      <input type="search" id="q" placeholder="Search titles, tags, reasons…" autocomplete="off">
+      <div class="seg" id="segCat">
+        <button data-cat="all" class="on">All</button>
+        <button data-cat="Movie">Movies</button>
+        <button data-cat="Series">Series</button>
+        <button data-cat="Book">Books</button>
+        <button data-cat="Game">Games</button>
+      </div>
+      <select id="sortSel">
+        <option value="score">Sort: best match</option>
+        <option value="title">Sort: title A–Z</option>
+        <option value="year">Sort: newest first</option>
+        <option value="yearOld">Sort: oldest first</option>
+      </select>
+      <label class="toggle"><input type="checkbox" id="hideDone">Hide done</label>
+    </div>
+    <div class="row">
+      <div class="chips" id="chips"></div>
+      <span class="count" id="cTxt"></span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="gaps">
+    <b>Fill these first — incomplete sets you already own</b>
+    <code>Arcane S02</code> <code>Love, Death &amp; Robots S01, S03, S04</code> <code>The Expanse S02–S06</code>
+    <code>Mr. Robot S01–S03</code> <code>Westworld S02+</code> <code>The Last of Us S02</code>
+    <code>Stranger Things S01–02, S04–05</code>
+    <code>Demon Slayer S02+</code> <code>One Punch Man S02</code>
+  </div>
+  <div id="out"></div>
+</div>
+
+<footer>
+  Links open YouTube / Goodreads searches so they never rot. Match score is my confidence you'll like it,
+  based on what's in your folder. Ticks, filters and sort order are remembered per browser;
+  Export backup writes a small JSON you can keep next to this file or carry to another machine.
+</footer>
+
+<script>
+const D=[
+/* ============ CYBERPUNK / NEON-NOIR — the new top tier ============ */
+{c:"Movie",t:"Blade Runner: The Final Cut",y:1982,s:99,g:["cyberpunk","sci-fi"],w:"The original. You loved 2049 — this is the film it spent 35 years answering."},
+{c:"Movie",t:"Ghost in the Shell",y:1995,s:98,g:["cyberpunk","anime","sci-fi"],w:"The film Edgerunners and 2049 both descend from. Densest cyberpunk ever animated."},
+{c:"Series",t:"Pantheon",y:2022,s:97,g:["cyberpunk","animation","sci-fi"],w:"Adult animated SF about uploaded minds. The closest thing to Edgerunners + Love Death & Robots in series form."},
+{c:"Movie",t:"Akira",y:1988,s:97,g:["cyberpunk","anime","action"],w:"You own Redline — this is its ancestor, and cyberpunk's founding text on screen."},
+{c:"Book",t:"Neuromancer",a:"William Gibson",y:1984,s:97,g:["cyberpunk","sci-fi"],w:"Invented the genre and the vocabulary. Everything you liked traces back here."},
+{c:"Series",t:"Severance",y:2022,s:96,g:["sci-fi","thriller","prestige"],w:"Serialised and character-first, not a cautionary tech parable — Westworld's premise with Dark's patience."},
+{c:"Book",t:"Do Androids Dream of Electric Sheep?",a:"Philip K. Dick",y:1968,s:96,g:["cyberpunk","sci-fi"],w:"Blade Runner's source novel. Stranger and sadder than either film."},
+{c:"Series",t:"Scavengers Reign",y:2023,s:95,g:["animation","sci-fi","cyberpunk"],w:"Hand-drawn hard SF on an alien world. Made for Love Death & Robots viewers."},
+{c:"Movie",t:"The Matrix",y:1999,s:95,g:["cyberpunk","action","sci-fi"],w:"Direct descendant of Ghost in the Shell. Not in your folder — fix that."},
+{c:"Book",t:"Leviathan Wakes",a:"The Expanse #1 · James S.A. Corey",y:2011,s:94,g:["sci-fi","space"],w:"You own the show's S01. Nine books; the series only adapted six."},
+{c:"Series",t:"Altered Carbon",y:2018,s:92,g:["cyberpunk","sci-fi","thriller"],w:"Neon-noir detective story in a body-swapping future. S1 is the one."},
+{c:"Book",t:"Blindsight",a:"Peter Watts",y:2006,s:92,g:["sci-fi","hard-sf"],w:"Hardest hard SF here. First contact with no comfort offered."},
+{c:"Series",t:"Ghost in the Shell: Stand Alone Complex",y:2002,s:91,g:["cyberpunk","anime","procedural"],w:"Episodic cyber-crime procedural. Your Sicario instincts plus your anime shelf."},
+{c:"Movie",t:"Memories of Murder",y:2003,s:90,g:["thriller","crime","procedural"],w:"Bong Joon-ho's serial-killer procedural. Where Snowpiercer meets No Country."},
+{c:"Series",t:"Psycho-Pass",y:2012,s:90,g:["cyberpunk","anime","procedural"],w:"Precrime dystopia, Gen Urobuchi writing. Minority Report as a police anime."},
+{c:"Book",t:"Snow Crash",a:"Neal Stephenson",y:1992,s:92,g:["cyberpunk","sci-fi"],w:"Cyberpunk at maximum velocity and sense of humour. Coined 'metaverse'."},
+{c:"Book",t:"Burning Chrome",a:"William Gibson",y:1986,s:90,g:["cyberpunk","short-fiction"],w:"Ten short stories, hard neon. The literary equivalent of Love Death & Robots S1."},
+{c:"Book",t:"Stories of Your Life and Others",a:"Ted Chiang",y:2002,s:90,g:["sci-fi","short-fiction"],w:"Source of Arrival. The other eight stories are as good or better."},
+{c:"Book",t:"Altered Carbon",a:"Richard K. Morgan",y:2002,s:90,g:["cyberpunk","thriller"],w:"Harder and nastier than the show. Pure noir plumbing."},
+{c:"Series",t:"Blue Eye Samurai",y:2023,s:90,g:["animation","action","prestige","character-first"],w:"Adult animation with Arcane's craft and Berserk's brutality. Dispatch strengthens the signal that sharply written, character-led animation belongs near the top."},
+{c:"Series",t:"Better Call Saul",y:2015,s:88,g:["crime","prestige","drama"],w:"You've done Breaking Bad. This is the better-built show."},
+{c:"Movie",t:"A Scanner Darkly",y:2006,s:88,g:["cyberpunk","sci-fi","animation"],w:"Rotoscoped PKD paranoia. Formally unlike anything in your folder."},
+{c:"Movie",t:"Prisoners",y:2013,s:88,g:["thriller","crime","procedural"],w:"Villeneuve's bleakest. Same director as 2049, Dune and Sicario."},
+{c:"Book",t:"Children of Time",a:"Adrian Tchaikovsky",y:2015,s:88,g:["sci-fi","hard-sf"],w:"Deep-time evolution SF. Project Hail Mary's cerebral cousin."},
+{c:"Series",t:"Andor",y:2022,s:87,g:["sci-fi","thriller","prestige"],w:"Grounded, adult, procedural. Nothing like Rise of Skywalker."},
+{c:"Movie",t:"Dredd",y:2012,s:87,g:["cyberpunk","action"],w:"One tower, one bad day, staggering neon slow-motion. Underrated."},
+{c:"Movie",t:"The Host",y:2006,s:86,g:["kaiju","sci-fi","thriller"],w:"Bong Joon-ho kaiju. Sits exactly between Snowpiercer and your Godzilla shelf."},
+{c:"Movie",t:"Hell or High Water",y:2016,s:86,g:["thriller","crime","western"],w:"Written by Sicario's screenwriter. Same DNA, different key."},
+{c:"Movie",t:"Upgrade",y:2018,s:86,g:["cyberpunk","action","sci-fi"],w:"Lean body-augmentation revenge film. Edgerunners' plot in live action."},
+{c:"Movie",t:"Paprika",y:2006,s:86,g:["anime","sci-fi","animation"],w:"Satoshi Kon. The film Inception borrowed most of its imagery from."},
+{c:"Series",t:"Vinland Saga",y:2019,s:86,g:["anime","action","drama"],w:"Best-written anime of the last decade. Berserk and AoT lineage."},
+{c:"Book",t:"The Three-Body Problem",a:"Cixin Liu",y:2008,s:86,g:["sci-fi","hard-sf"],w:"Read it before the show if you can. The scale escalation is the point."},
+{c:"Movie",t:"Godzilla",y:1954,s:85,g:["kaiju","sci-fi"],w:"You have Shin, Minus One and the MonsterVerse. This is the origin, and it's a grief film."},
+{c:"Movie",t:"Zodiac",y:2007,s:85,g:["thriller","crime","procedural"],w:"Fincher's obsession procedural. Two and a half hours of nothing but process."},
+{c:"Movie",t:"Sunshine",y:2007,s:85,g:["sci-fi","hard-sf"],w:"Danny Boyle — he directed your 28 Days Later. Sun-diving hard SF."},
+{c:"Series",t:"Devs",y:2020,s:84,g:["sci-fi","thriller","cyberpunk"],w:"From the Ex Machina director. The closest TV analogue to that film."},
+{c:"Movie",t:"Perfect Blue",y:1997,s:84,g:["anime","thriller","animation"],w:"Satoshi Kon's identity-collapse thriller. Aronofsky lifted from it twice."},
+{c:"Movie",t:"Minority Report",y:2002,s:84,g:["cyberpunk","sci-fi","thriller"],w:"PKD adaptation with the best future-interface design in film."},
+{c:"Movie",t:"Moon",y:2009,s:84,g:["sci-fi","hard-sf"],w:"One man, one base, one idea. Ad Astra adjacent, better executed."},
+{c:"Movie",t:"Dark City",y:1998,s:84,g:["cyberpunk","sci-fi","noir"],w:"Came out a year before The Matrix and did some of it better."},
+{c:"Series",t:"Cowboy Bebop",y:1998,s:84,g:["anime","sci-fi","noir"],w:"Space-noir with the best soundtrack in anime. The 1998 series, not the remake."},
+{c:"Book",t:"The Martian",a:"Andy Weir",y:2011,s:84,g:["sci-fi","hard-sf"],w:"The one Weir you haven't read. Substantially denser than the film."},
+{c:"Movie",t:"RoboCop",y:1987,s:83,g:["cyberpunk","action","satire"],w:"Verhoeven satire that's only gotten sharper. Corporate dystopia, done first."},
+{c:"Movie",t:"Wind River",y:2017,s:82,g:["thriller","crime","procedural"],w:"Completes the Sheridan trilogy with Sicario and Hell or High Water."},
+{c:"Movie",t:"Princess Mononoke",y:1997,s:82,g:["anime","animation","fantasy"],w:"You own Grave of the Fireflies. This is the other essential Ghibli."},
+{c:"Movie",t:"Senna",y:2010,s:82,g:["motorsport","documentary"],w:"Archive-only documentary. You own Rush and Ford v Ferrari."},
+{c:"Movie",t:"Total Recall",y:1990,s:82,g:["sci-fi","action","cyberpunk"],w:"More PKD, more Verhoeven. Practical effects that still land."},
+{c:"Series",t:"Silo",y:2023,s:82,g:["sci-fi","thriller","post-apoc"],w:"Post-apocalyptic mystery box with real production weight. Fallout adjacent."},
+{c:"Series",t:"Invincible",y:2021,s:91,g:["animation","action","superhero","character-first"],w:"Adult superhero animation with real consequences, messy friendships, and escalating stakes. Dispatch is a strong confirmation that this is your lane."},
+{c:"Series",t:"Steins;Gate",y:2011,s:82,g:["anime","sci-fi","cyberpunk"],w:"Time-travel plotting on par with Dark. Slow first four episodes, then it detonates."},
+{c:"Book",t:"Recursion",a:"Blake Crouch",y:2019,s:82,g:["sci-fi","thriller"],w:"Propulsive high-concept. Two nights, maximum."},
+{c:"Book",t:"The Peripheral",a:"William Gibson",y:2014,s:82,g:["cyberpunk","sci-fi"],w:"Late Gibson. Two futures, one telepresence link, zero hand-holding."},
+{c:"Series",t:"Fullmetal Alchemist: Brotherhood",y:2009,s:80,g:["anime","action","fantasy"],w:"The complete-story anime people mean when they say 'start here'."},
+{c:"Movie",t:"A Silent Voice",y:2016,s:80,g:["anime","animation","drama"],w:"If Your Name landed, this hits considerably harder."},
+{c:"Movie",t:"The Raid",y:2011,s:80,g:["action","thriller"],w:"Purest action film of its decade. No plot to speak of, and it doesn't need one."},
+{c:"Movie",t:"Collateral",y:2004,s:80,g:["thriller","crime","noir"],w:"Michael Mann shooting night-time LA on early digital. Same craft as your Heat."},
+{c:"Movie",t:"Come and See",y:1985,s:80,g:["war","drama"],w:"The heaviest war film ever made. Watch it once, deliberately."},
+{c:"Movie",t:"Gattaca",y:1997,s:80,g:["sci-fi","drama"],w:"Quiet, idea-first SF. Genetic determinism, no action scenes."},
+{c:"Series",t:"Serial Experiments Lain",y:1998,s:80,g:["cyberpunk","anime","sci-fi"],w:"1998 anime that predicted the internet's psychology. Genuinely disorienting."},
+{c:"Book",t:"Roadside Picnic",a:"Strugatsky brothers",y:1972,s:80,g:["sci-fi","short"],w:"Short. The ancestor of Annihilation, STALKER and every 'Zone' story since."},
+{c:"Book",t:"Midnight in Chernobyl",a:"Adam Higginbotham",y:2019,s:80,g:["non-fiction","history"],w:"Corrects what the HBO series dramatised, and is somehow tenser."},
+{c:"Book",t:"A Scanner Darkly",a:"Philip K. Dick",y:1977,s:80,g:["cyberpunk","sci-fi"],w:"PKD's most personal book. Surveillance and self-erasure."},
+{c:"Movie",t:"Rebel Ridge",y:2024,s:78,g:["thriller","action","crime"],w:"Jeremy Saulnier — he made your Blue Ruin and Green Room."},
+{c:"Movie",t:"The Raid 2",y:2014,s:78,g:["action","crime"],w:"Bigger, crime-epic scope. The kitchen fight is the reason."},
+{c:"Movie",t:"John Wick: Chapter 4",y:2023,s:78,g:["action"],w:"You stopped at Parabellum. This is the peak of the series' choreography."},
+{c:"Series",t:"True Detective",y:2014,s:78,g:["crime","thriller","prestige"],w:"Season 1 only. Southern-gothic procedural with genuine dread."},
+{c:"Series",t:"Chainsaw Man",y:2022,s:78,g:["anime","action"],w:"Best-animated modern shonen. MAPPA, same studio as Attack on Titan's final seasons."},
+{c:"Series",t:"Star Wars: Visions",y:2021,s:78,g:["animation","anime","anthology"],w:"Anime studios given Star Wars and no rules. Shorts, so it's Love Death & Robots-shaped."},
+{c:"Series",t:"Frieren: Beyond Journey's End",y:2023,s:78,g:["anime","fantasy","drama"],w:"Slow, melancholy, about outliving everyone. Tonal cousin to Grave of the Fireflies."},
+{c:"Book",t:"Seveneves",a:"Neal Stephenson",y:2015,s:78,g:["sci-fi","hard-sf"],w:"Orbital-mechanics engineering at obsessive length. First two thirds are superb."},
+{c:"Book",t:"Dark Matter",a:"Blake Crouch",y:2016,s:78,g:["sci-fi","thriller"],w:"One-sitting thriller. Pure momentum."},
+{c:"Book",t:"Hyperion",a:"Dan Simmons",y:1989,s:78,g:["sci-fi","space"],w:"Canterbury Tales in space. Structurally the most ambitious book here."},
+{c:"Book",t:"The Diamond Age",a:"Neal Stephenson",y:1995,s:78,g:["cyberpunk","sci-fi"],w:"Post-cyberpunk nanotech. Denser and odder than Snow Crash."},
+{c:"Movie",t:"Strange Days",y:1995,s:78,g:["cyberpunk","thriller","noir"],w:"Recorded-memory black market in millennium-eve LA. Written by James Cameron."},
+{c:"Movie",t:"F1",y:2025,s:76,g:["motorsport","drama"],w:"Big-screen motorsport spectacle, shot at real race weekends."},
+{c:"Movie",t:"All Quiet on the Western Front",y:2022,s:76,g:["war","drama"],w:"The modern WWI companion piece to 1917."},
+{c:"Movie",t:"Ghost in the Shell 2: Innocence",y:2004,s:76,g:["cyberpunk","anime","animation"],w:"Slower and more beautiful than the first. Almost a tone poem."},
+{c:"Movie",t:"The Boy and the Heron",y:2023,s:76,g:["anime","animation","fantasy"],w:"Miyazaki's latest and most opaque."},
+{c:"Movie",t:"Good Time",y:2017,s:76,g:["thriller","crime"],w:"Safdie brothers — the same anxiety engine as your Uncut Gems."},
+{c:"Series",t:"The Terror",y:2018,s:76,g:["drama","thriller","prestige"],w:"Season 1 only. Chernobyl-grade slow institutional dread, in the Arctic."},
+{c:"Series",t:"Ergo Proxy",y:2006,s:76,g:["cyberpunk","anime","sci-fi"],w:"Domed-city post-apocalypse. Heavy, moody, philosophical."},
+{c:"Series",t:"3 Body Problem",y:2024,s:76,g:["sci-fi","thriller"],w:"Big-idea SF, made by the Game of Thrones showrunners."},
+{c:"Book",t:"Exhalation",a:"Ted Chiang",y:2019,s:76,g:["sci-fi","short-fiction"],w:"His second collection. 'The Merchant and the Alchemist's Gate' alone earns it."},
+{c:"Book",t:"Daemon",a:"Daniel Suarez",y:2006,s:76,g:["cyberpunk","thriller"],w:"Autonomous software runs an insurgency. Techno-thriller, plausibly built."},
+{c:"Movie",t:"Enemy",y:2013,s:74,g:["thriller","sci-fi"],w:"Villeneuve at his strangest. 90 minutes, one image you won't shake."},
+{c:"Movie",t:"Glass Onion",y:2022,s:74,g:["mystery","comedy"],w:"Knives Out sequel."},
+{c:"Movie",t:"Kong: Skull Island",y:2017,s:74,g:["kaiju","action"],w:"Completes your MonsterVerse run."},
+{c:"Movie",t:"The Zone of Interest",y:2023,s:74,g:["war","drama"],w:"Formally radical Holocaust film. Pairs with Chernobyl's institutional horror."},
+{c:"Series",t:"Castlevania",y:2017,s:80,g:["animation","action","fantasy","character-first"],w:"Adult animated fantasy with a sardonic, combustible core trio. Arcane's rougher predecessor, and a better fit now that Dispatch landed."},
+{c:"Series",t:"Harley Quinn",y:2019,s:85,g:["animation","superhero","comedy","ensemble"],w:"Adult animated superhero chaos with fast banter and a real found-family arc. The closest TV match for Dispatch's irreverent comic-book energy."},
+{c:"Series",t:"The Legend of Vox Machina",y:2022,s:84,g:["animation","fantasy","comedy","ensemble"],w:"An adult animated party adventure: filthy jokes, genuine loyalty, and escalating emotional stakes. Strong Dispatch fit if you want another crew to live with."},
+{c:"Series",t:"Doom Patrol",y:2019,s:82,g:["superhero","comedy","ensemble","character-first"],w:"Broken superpowered misfits in a weird workplace-family. It earns its emotions underneath the absurdity — a live-action Dispatch-adjacent pick."},
+{c:"Series",t:"Secret Level",y:2024,s:66,g:["animation","anthology","sci-fi"],w:"Love Death & Robots' team doing game-world shorts. Spectacle over story — lowered since anthologies with a message didn't work for you."},
+{c:"Series",t:"Monster",y:2004,s:74,g:["anime","thriller","crime"],w:"Where Death Note fans go next. Slower, smarter, no supernatural crutch."},
+{c:"Book",t:"Command and Control",a:"Eric Schlosser",y:2013,s:74,g:["non-fiction","history"],w:"Nuclear near-misses. Oppenheimer's terrifying sequel."},
+{c:"Book",t:"The Road",a:"Cormac McCarthy",y:2006,s:74,g:["post-apoc","literary"],w:"Same author as No Country. Spare, and the bleakest thing on this page."},
+{c:"Book",t:"Ubik",a:"Philip K. Dick",y:1969,s:74,g:["sci-fi","cyberpunk"],w:"PKD's most unstable reality. Short and disorienting."},
+{c:"Movie",t:"Wake Up Dead Man",y:2025,s:72,g:["mystery","comedy"],w:"Third Benoit Blanc film."},
+{c:"Movie",t:"Coherence",y:2013,s:72,g:["sci-fi","thriller"],w:"Micro-budget, one house, one enormous idea. Made for almost nothing."},
+{c:"Series",t:"Texhnolyze",y:2003,s:72,g:["cyberpunk","anime"],w:"The bleakest cyberpunk anime ever made. Barely any dialogue for four episodes."},
+{c:"Movie",t:"Predestination",y:2014,s:71,g:["sci-fi","thriller"],w:"Time-loop puzzle box that actually closes."},
+{c:"Movie",t:"Tron: Legacy",y:2010,s:70,g:["cyberpunk","sci-fi","action"],w:"Thin story, but the Daft Punk score and neon design are the whole point."},
+{c:"Movie",t:"Letters from Iwo Jima",y:2006,s:70,g:["war","drama"],w:"The other side of your Midway."},
+{c:"Movie",t:"Suzume",y:2022,s:70,g:["anime","animation","fantasy"],w:"Makoto Shinkai, same director as Your Name."},
+{c:"Series",t:"Made in Abyss",y:2017,s:70,g:["anime","fantasy","adventure"],w:"Looks cute. Is not. Berserk-grade cruelty under a cheerful art style."},
+{c:"Series",t:"The Pacific",y:2010,s:70,g:["war","prestige","drama"],w:"Band of Brothers' companion series. Grimmer, less loved, still excellent."},
+{c:"Series",t:"Fargo",y:2014,s:70,g:["crime","thriller","anthology"],w:"Anthology. Seasons 1 and 2 are the ones that matter."},
+{c:"Series",t:"Primal",y:2019,s:70,g:["animation","action"],w:"Near-wordless Tartakovsky animation. Adventure Time's exact opposite."},
+{c:"Book",t:"House of Suns",a:"Alastair Reynolds",y:2008,s:70,g:["sci-fi","space","hard-sf"],w:"Six-million-year timescale space opera. Unusually warm for Reynolds."},
+{c:"Book",t:"American Prometheus",a:"Bird & Sherwin",y:2005,s:70,g:["non-fiction","history"],w:"Nolan's source text for Oppenheimer."},
+{c:"Book",t:"Autonomous",a:"Annalee Newitz",y:2017,s:70,g:["cyberpunk","sci-fi"],w:"Pharma piracy and robot autonomy. Modern, sharp cyberpunk."},
+{c:"Movie",t:"Blood Simple",y:1984,s:68,g:["thriller","crime","noir"],w:"First Coen brothers film. The seeds of No Country are all here."},
+{c:"Series",t:"Foundation",y:2021,s:68,g:["sci-fi","space"],w:"Gorgeous and uneven. Worth it purely for the scale."},
+{c:"Movie",t:"Mother",y:2009,s:66,g:["thriller","crime","drama"],w:"Bong's quietest and saddest film."},
+{c:"Movie",t:"Land of Mine",y:2015,s:66,g:["war","drama"],w:"Small, tense, post-WWII. German boys clearing Danish beaches."},
+{c:"Movie",t:"Primer",y:2004,s:66,g:["sci-fi","thriller"],w:"Deliberately impossible to follow first time. Made for $7,000."},
+{c:"Book",t:"Go Like Hell",a:"A.J. Baime",y:2009,s:66,g:["non-fiction","motorsport"],w:"The book behind Ford v Ferrari."},
+{c:"Series",t:"Generation Kill",y:2008,s:66,g:["war","prestige"],w:"Iraq miniseries from The Wire's team. Pairs directly with your Warfare."},
+{c:"Book",t:"The Right Stuff",a:"Tom Wolfe",y:1979,s:64,g:["non-fiction","space"],w:"You own Apollo 11. This is the prose equivalent."},
+{c:"Movie",t:"Millennium Actress",y:2001,s:64,g:["anime","animation","drama"],w:"The warmest Satoshi Kon film. Time and memory folded together."},
+{c:"Movie",t:"Under the Skin",y:2013,s:62,g:["sci-fi","drama"],w:"Abstract, cold, divisive. Almost no dialogue."},
+{c:"Movie",t:"Jarhead",y:2005,s:62,g:["war","drama"],w:"The tonal opposite of Warfare — war as unbearable boredom."},
+{c:"Book",t:"Station Eleven",a:"Emily St. John Mandel",y:2014,s:62,g:["post-apoc","literary"],w:"Literary post-collapse. Much quieter than your usual register."},
+/* ============ DISPATCH SIGNAL — choice-driven, adult genre crews ============ */
+{c:"Game",t:"The Wolf Among Us",y:2013,s:96,g:["choice-driven","noir","fantasy","character-first"],w:"The closest game match: stylish adult genre fiction, sharp dialogue, a damaged protagonist, and choices that shape how people meet you. Play this first."},
+{c:"Game",t:"Tales from the Borderlands",y:2014,s:95,g:["choice-driven","sci-fi","comedy","ensemble"],w:"A superb misfit crew, rapid-fire comedy, and choices that keep the relationships lively. Dispatch's workplace/team chemistry in a louder space-opera wrapper."},
+{c:"Game",t:"Marvel's Guardians of the Galaxy",y:2021,s:93,g:["superhero","sci-fi","comedy","ensemble"],w:"A single-player superhero story that lives or dies on squad banter, loyalty, and emotional payoffs. If Dispatch made you love the crew, this is the obvious next play."},
+{c:"Game",t:"Mass Effect Legendary Edition",y:2021,s:92,g:["sci-fi","choice-driven","ensemble","character-first"],w:"The definitive 'assemble a crew and make choices that matter' trilogy. Less comedic than Dispatch, but unmatched for relationships and consequences."},
+{c:"Game",t:"Baldur's Gate 3",y:2023,s:91,g:["fantasy","choice-driven","ensemble","character-first"],w:"The modern high-water mark for companions, banter, and choices with consequences. A huge commitment, but tailor-made if Dispatch's relationships were the hook."},
+{c:"Game",t:"Life is Strange",y:2015,s:87,g:["choice-driven","drama","character-first"],w:"More intimate and less funny, but one of the clearest games for character bonds and decisions that feel personal rather than mechanical."},
+{c:"Game",t:"Midnight Suns",y:2022,s:86,g:["superhero","strategy","ensemble","character-first"],w:"Turn-based superhero tactics wrapped around surprisingly good hangouts with the team. The least cinematic game here, but perhaps the best pure 'superhero workplace' fit."},
+{c:"Game",t:"Oxenfree",y:2016,s:83,g:["choice-driven","sci-fi","dialogue","character-first"],w:"Compact supernatural mystery built around natural, overlapping conversation. A good palate-cleanser when you want Dispatch-style dialogue without a 50-hour game."},
+{c:"Movie",t:"Le Mans",y:1971,s:58,g:["motorsport"],w:"Steve McQueen, almost no plot, real 1970 race footage. For the purist mood."}
+];
+
+const HOT={Movie:4,Series:5,Book:4,Game:5};
+const CATS={Movie:{h:"Movies",n:"Cyberpunk and neon-noir moved to the top. Horror titles removed on request."},
+            Series:{h:"Series",n:"Adult animation, sharp ensemble chemistry, and superhero misfits climbed after Dispatch."},
+            Book:{h:"Books",n:"Goodreads links. Cyberpunk canon leads; you've cleared Weir except The Martian."},
+            Game:{h:"Games",n:"New section, ranked from the Dispatch signal: choice-driven genre stories, adult humor, and crews with real chemistry."}};
+
+const el=s=>document.querySelector(s);
+const st={cat:"all",q:"",sort:"score",tags:new Set(),hide:false,done:new Set()};
+
+/* ---------- persistence: localStorage, with graceful fallback ---------- */
+const KEY="jeff.watchlist.v3";
+let store=null;
+try{ localStorage.setItem(KEY+".probe","1"); localStorage.removeItem(KEY+".probe"); store=localStorage; }
+catch(e){ store=null; }   // blocked (private mode / sandboxed frame) -> Export still works
+
+(function load(){
+  if(!store) return;
+  try{
+    // Carry forward completed items from the prior version when this is the first v3 visit.
+    const o=JSON.parse(store.getItem(KEY)||store.getItem("jeff.watchlist.v2")||"null"); if(!o) return;
+    st.done=new Set(o.done||[]);
+    st.tags=new Set(o.tags||[]);
+    if(o.cat) st.cat=o.cat;
+    if(o.sort) st.sort=o.sort;
+    st.hide=!!o.hide;
+  }catch(e){}
+})();
+
+function save(){
+  if(!store) return;
+  try{ store.setItem(KEY,JSON.stringify(
+    {v:3,done:[...st.done],tags:[...st.tags],cat:st.cat,sort:st.sort,hide:st.hide,at:Date.now()}));
+  }catch(e){}
+}
+
+// ---- tag chips
+const tagCount={};
+D.forEach(d=>d.g.forEach(g=>tagCount[g]=(tagCount[g]||0)+1));
+const TAGS=Object.keys(tagCount).sort((a,b)=>tagCount[b]-tagCount[a]);
+el("#chips").innerHTML=TAGS.map(t=>
+  `<button class="chip" data-tag="${t}">${t} <span style="opacity:.5">${tagCount[t]}</span></button>`).join("");
+
+// ---- links
+const enc=s=>encodeURIComponent(s).replace(/%20/g,"+");
+const link=d=> d.c==="Book"
+  ? {u:"https://www.goodreads.com/search?q="+enc(d.t+" "+(d.a||"").split("·").pop().trim()),l:"Goodreads"}
+  : {u:"https://www.youtube.com/results?search_query="+enc(d.t+" "+d.y+(d.c==="Series"?" series":"")+" trailer"),l:"Trailer"};
+
+const key=d=>d.c+"|"+d.t;
+
+function scoreClass(s){return s>=90?"s90":s>=80?"s80":s>=70?"s70":"s60"}
+
+function render(){
+  const q=st.q.toLowerCase();
+  let rows=D.filter(d=>{
+    if(st.cat!=="all" && d.c!==st.cat) return false;
+    if(st.tags.size && !d.g.some(g=>st.tags.has(g))) return false;
+    if(st.hide && st.done.has(key(d))) return false;
+    if(q){
+      const hay=(d.t+" "+(d.a||"")+" "+d.w+" "+d.g.join(" ")+" "+d.y).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const cmp={score:(a,b)=>b.s-a.s||a.t.localeCompare(b.t),
+             title:(a,b)=>a.t.localeCompare(b.t),
+             year:(a,b)=>b.y-a.y, yearOld:(a,b)=>a.y-b.y}[st.sort];
+  rows.sort(cmp);
+
+  const groups = st.cat==="all" ? ["Movie","Series","Book","Game"] : [st.cat];
+  let html="";
+  groups.forEach(cat=>{
+    const set=rows.filter(d=>d.c===cat);
+    if(!set.length) return;
+    html+=`<h2>${CATS[cat].h} <em>${set.length} title${set.length>1?"s":""}</em></h2>
+           <p class="snote">${CATS[cat].n}</p><div class="grid">`;
+    set.forEach((d,i)=>{
+      const k=key(d), done=st.done.has(k), L=link(d);
+      const hot = st.sort==="score" && !st.tags.size && !q && i<HOT[cat];
+      html+=`<div class="card ${done?"done":""} ${hot?"hot":""}">
+        <label class="ck"><input type="checkbox" data-k="${k}" ${done?"checked":""}></label>
+        <div class="sc ${scoreClass(d.s)}"><b>${d.s}</b><small>match</small></div>
+        <div>
+          <div class="ti">${d.t}<span class="yr">${d.a?d.a+" · ":""}${d.y}</span></div>
+          <div class="why">${d.w}</div>
+          <div class="tg">${d.g.map(g=>`<span class="${g==="cyberpunk"?"k":""}">${g}</span>`).join("")}</div>
+        </div>
+        <a class="go" href="${L.u}" target="_blank" rel="noopener">${L.l} &rarr;</a>
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+  el("#out").innerHTML = html || `<div class="empty">Nothing matches those filters.</div>`;
+  el("#cTxt").textContent=`${rows.length} of ${D.length} shown`;
+  updProg();
+}
+
+function updProg(){
+  const n=st.done.size, t=D.length;
+  el("#pTxt").textContent=`${n} of ${t} done`;
+  el("#pBar").style.width=(t?n/t*100:0)+"%";
+  save();
+}
+
+function syncUI(){
+  [...el("#segCat").children].forEach(b=>b.classList.toggle("on",b.dataset.cat===st.cat));
+  el("#sortSel").value=st.sort;
+  el("#hideDone").checked=st.hide;
+  [...el("#chips").children].forEach(b=>b.classList.toggle("on",st.tags.has(b.dataset.tag)));
+  const s=el("#saveState");
+  if(store){ s.textContent="Saved automatically in this browser — close the tab and your ticks stay put.";
+             s.style.color="var(--gr)"; }
+  else{ s.textContent="Auto-save is blocked here. Open the file directly in Chrome or Edge, or use Export backup.";
+        s.style.color="var(--am)"; }
+}
+
+// ---- events
+el("#out").addEventListener("change",e=>{
+  const cb=e.target.closest("input[type=checkbox]"); if(!cb) return;
+  cb.checked?st.done.add(cb.dataset.k):st.done.delete(cb.dataset.k);
+  cb.closest(".card").classList.toggle("done",cb.checked);
+  if(st.hide&&cb.checked) render(); else updProg();
+});
+el("#q").addEventListener("input",e=>{st.q=e.target.value;render()});
+el("#sortSel").addEventListener("change",e=>{st.sort=e.target.value;render()});
+el("#hideDone").addEventListener("change",e=>{st.hide=e.target.checked;render()});
+el("#segCat").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  st.cat=b.dataset.cat;
+  [...el("#segCat").children].forEach(x=>x.classList.toggle("on",x===b));
+  render(); window.scrollTo({top:0});
+});
+el("#chips").addEventListener("click",e=>{
+  const b=e.target.closest(".chip"); if(!b) return;
+  const t=b.dataset.tag;
+  st.tags.has(t)?st.tags.delete(t):st.tags.add(t);
+  b.classList.toggle("on",st.tags.has(t));
+  render();
+});
+el("#expBtn").addEventListener("click",()=>{
+  try{
+    const blob=new Blob([JSON.stringify({done:[...st.done]},null,2)],{type:"application/json"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download="watchlist-progress.json"; a.click();
+  }catch(e){ alert("Download blocked here. Your ticks are still saved automatically."); }
+});
+el("#impBtn").addEventListener("click",()=>el("#impFile").click());
+el("#impFile").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{try{st.done=new Set(JSON.parse(r.result).done||[]);save();render()}
+                catch(err){alert("Could not read that file.")}};
+  r.readAsText(f);
+  e.target.value="";
+});
+el("#resetBtn").addEventListener("click",()=>{
+  if(!st.done.size||!confirm("Clear all "+st.done.size+" ticks?")) return;
+  st.done.clear(); save(); render();
+});
+
+syncUI();
+render();
+</script>
+</body>
+</html>
