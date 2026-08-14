@@ -20,6 +20,16 @@ class WatchlistGameSignalTests(unittest.TestCase):
         self.assertIn('Expedition 33 confirmed', self.source)
         self.assertIn('live-service grinds', self.source.lower())
 
+    def test_games_have_single_player_and_multiplayer_mode_tabs(self):
+        self.assertIn('id="segMode"', self.source)
+        self.assertIn('data-mode="single"', self.source)
+        self.assertIn('data-mode="multi"', self.source)
+        self.assertIn('m:"single"', self.source)
+        self.assertIn('m:"multi"', self.source)
+        self.assertIn('st.mode', self.source)
+        self.assertIn('jeff.watchlist.v4', self.source)
+        self.assertIn('Multiplayer', self.source)
+
 
 if __name__ == "__main__":
     unittest.main()
