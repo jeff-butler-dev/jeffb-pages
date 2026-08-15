@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Watchlist, Reading List &amp; Games — Ranked</title>
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
+<title>Watchlist, Reading List &amp; Games</title>
 <style>
   :root{
     color-scheme: dark;
@@ -118,17 +120,12 @@
 
 <header>
   <div class="wrap">
-    <h1>Watchlist, Reading List &amp; Games — <span>ranked for you</span></h1>
-    <p class="sub">Built from your library, then re-weighted around what you said you loved:
-      <b style="color:var(--mg)">Blade Runner 2049</b>, <b style="color:var(--mg)">Cyberpunk: Edgerunners</b>, and
-      <b style="color:var(--mg)">early Love, Death &amp; Robots</b>, and <b style="color:var(--mg)">Dispatch</b>.
-      Character-first genre stories, adult animation, team chemistry, sharp comedy, and choices with consequences
-      now carry extra weight. Horror is removed, Black Mirror-style cautionary anthologies are down-weighted, and
-      everything you've seen or read is gone.</p>
+    <h1>Watchlist, Reading List &amp; Games — <span>ranked recommendations</span></h1>
+    <p class="sub">A curated mix of character-first genre stories, adult animation, team chemistry,
+      sharp comedy, and meaningful choices across movies, series, books, and games.</p>
     <p class="sub" style="margin-top:10px;color:var(--dim2);font-size:13px">
-      Reading of your taste: you want <b style="color:var(--dim)">worlds, characters, and a crew worth spending time with</b>,
-      not just thought experiments. Dispatch adds a clear signal for witty adult genre fiction, workplace/team dynamics,
-      and decisions that make relationships matter; Black Mirror's premise-then-punchline structure is still the part that didn't.</p>
+      This is a public recommendations page. Progress is stored only in the browser on the device being used;
+      export a backup to move it between browsers or devices.</p>
     <div class="prog">
       <span class="pnum" id="pTxt">0 of 0 done</span>
       <span class="bar"><i id="pBar"></i></span>
@@ -152,10 +149,9 @@
         <button data-cat="Book">Books</button>
         <button data-cat="Game">Games</button>
       </div>
-      <div class="seg" id="segMode" hidden>
-        <button data-mode="all" class="on">All games</button>
-        <button data-mode="single">Single player</button>
-        <button data-mode="multi">Multiplayer</button>
+      <div class="seg" id="segGameMode" hidden aria-label="Game recommendations">
+        <button data-game-mode="single" class="on">Single player</button>
+        <button data-game-mode="multi">Multiplayer</button>
       </div>
       <select id="sortSel">
         <option value="score">Sort: best match</option>
@@ -173,90 +169,83 @@
 </div>
 
 <div class="wrap">
-  <div class="gaps">
-    <b>Fill these first — incomplete sets you already own</b>
-    <code>Arcane S02</code> <code>Love, Death &amp; Robots S01, S03, S04</code> <code>The Expanse S02–S06</code>
-    <code>Mr. Robot S01–S03</code> <code>Westworld S02+</code> <code>The Last of Us S02</code>
-    <code>Stranger Things S01–02, S04–05</code>
-    <code>Demon Slayer S02+</code> <code>One Punch Man S02</code>
-  </div>
   <div id="out"></div>
 </div>
 
 <footer>
-  Links open YouTube / Goodreads searches so they never rot. Match score is my confidence you'll like it,
-  based on what's in your folder. Ticks, filters and sort order are remembered per browser;
-  Export backup writes a small JSON you can keep next to this file or carry to another machine.
+  Links open YouTube / Goodreads searches to remain useful over time. Match scores reflect editorial fit.
+  Ticks, filters, and sort order are remembered only in the current browser;
+  Export backup creates a small JSON file that can be moved between browsers or devices.
 </footer>
 
 <script>
 const D=[
 /* ============ CYBERPUNK / NEON-NOIR — the new top tier ============ */
-{c:"Movie",t:"Blade Runner: The Final Cut",y:1982,s:99,g:["cyberpunk","sci-fi"],w:"The original. You loved 2049 — this is the film it spent 35 years answering."},
+{c:"Movie",t:"Blade Runner: The Final Cut",y:1982,s:99,g:["cyberpunk","sci-fi"],w:"The original: a foundational cyberpunk classic and a natural companion to 2049."},
 {c:"Movie",t:"Ghost in the Shell",y:1995,s:98,g:["cyberpunk","anime","sci-fi"],w:"The film Edgerunners and 2049 both descend from. Densest cyberpunk ever animated."},
 {c:"Series",t:"Pantheon",y:2022,s:97,g:["cyberpunk","animation","sci-fi"],w:"Adult animated SF about uploaded minds. The closest thing to Edgerunners + Love Death & Robots in series form."},
-{c:"Movie",t:"Akira",y:1988,s:97,g:["cyberpunk","anime","action"],w:"You own Redline — this is its ancestor, and cyberpunk's founding text on screen."},
-{c:"Book",t:"Neuromancer",a:"William Gibson",y:1984,s:97,g:["cyberpunk","sci-fi"],w:"Invented the genre and the vocabulary. Everything you liked traces back here."},
+{c:"Movie",t:"Akira",y:1988,s:97,g:["cyberpunk","anime","action"],w:"An ancestor of Redline and a founding text of cyberpunk on screen."},
+{c:"Book",t:"Neuromancer",a:"William Gibson",y:1984,s:97,g:["cyberpunk","sci-fi"],w:"Invented much of the genre's vocabulary and remains a core cyberpunk text."},
 {c:"Series",t:"Severance",y:2022,s:96,g:["sci-fi","thriller","prestige"],w:"Serialised and character-first, not a cautionary tech parable — Westworld's premise with Dark's patience."},
 {c:"Book",t:"Do Androids Dream of Electric Sheep?",a:"Philip K. Dick",y:1968,s:96,g:["cyberpunk","sci-fi"],w:"Blade Runner's source novel. Stranger and sadder than either film."},
 {c:"Series",t:"Scavengers Reign",y:2023,s:95,g:["animation","sci-fi","cyberpunk"],w:"Hand-drawn hard SF on an alien world. Made for Love Death & Robots viewers."},
-{c:"Movie",t:"The Matrix",y:1999,s:95,g:["cyberpunk","action","sci-fi"],w:"Direct descendant of Ghost in the Shell. Not in your folder — fix that."},
-{c:"Book",t:"Leviathan Wakes",a:"The Expanse #1 · James S.A. Corey",y:2011,s:94,g:["sci-fi","space"],w:"You own the show's S01. Nine books; the series only adapted six."},
+{c:"Movie",t:"The Matrix",y:1999,s:95,g:["cyberpunk","action","sci-fi"],w:"A direct descendant of Ghost in the Shell and a strong next pick."},
+{c:"Book",t:"Leviathan Wakes",a:"The Expanse #1 · James S.A. Corey",y:2011,s:94,g:["sci-fi","space"],w:"Nine books long; the screen adaptation covers only part of the saga."},
 {c:"Series",t:"Altered Carbon",y:2018,s:92,g:["cyberpunk","sci-fi","thriller"],w:"Neon-noir detective story in a body-swapping future. S1 is the one."},
 {c:"Book",t:"Blindsight",a:"Peter Watts",y:2006,s:92,g:["sci-fi","hard-sf"],w:"Hardest hard SF here. First contact with no comfort offered."},
-{c:"Series",t:"Ghost in the Shell: Stand Alone Complex",y:2002,s:91,g:["cyberpunk","anime","procedural"],w:"Episodic cyber-crime procedural. Your Sicario instincts plus your anime shelf."},
+{c:"Series",t:"Ghost in the Shell: Stand Alone Complex",y:2002,s:91,g:["cyberpunk","anime","procedural"],w:"An episodic cyber-crime procedural blending noir investigation and anime sci-fi."},
 {c:"Movie",t:"Memories of Murder",y:2003,s:90,g:["thriller","crime","procedural"],w:"Bong Joon-ho's serial-killer procedural. Where Snowpiercer meets No Country."},
 {c:"Series",t:"Psycho-Pass",y:2012,s:90,g:["cyberpunk","anime","procedural"],w:"Precrime dystopia, Gen Urobuchi writing. Minority Report as a police anime."},
 {c:"Book",t:"Snow Crash",a:"Neal Stephenson",y:1992,s:92,g:["cyberpunk","sci-fi"],w:"Cyberpunk at maximum velocity and sense of humour. Coined 'metaverse'."},
 {c:"Book",t:"Burning Chrome",a:"William Gibson",y:1986,s:90,g:["cyberpunk","short-fiction"],w:"Ten short stories, hard neon. The literary equivalent of Love Death & Robots S1."},
-{c:"Book",t:"Stories of Your Life and Others",a:"Ted Chiang",y:2002,s:90,g:["sci-fi","short-fiction"],w:"Source of Arrival. The other eight stories are as good or better."},
+{c:"Book",t:"Stories of Your Life and Others",a:"Ted Chiang",y:2002,s:90,g:["sci-fi","short-fiction"],w:"Source of Arrival. The remaining stories are similarly strong."},
 {c:"Book",t:"Altered Carbon",a:"Richard K. Morgan",y:2002,s:90,g:["cyberpunk","thriller"],w:"Harder and nastier than the show. Pure noir plumbing."},
 {c:"Series",t:"Blue Eye Samurai",y:2023,s:90,g:["animation","action","prestige","character-first"],w:"Adult animation with Arcane's craft and Berserk's brutality. Dispatch strengthens the signal that sharply written, character-led animation belongs near the top."},
-{c:"Series",t:"Better Call Saul",y:2015,s:88,g:["crime","prestige","drama"],w:"You've done Breaking Bad. This is the better-built show."},
-{c:"Movie",t:"A Scanner Darkly",y:2006,s:88,g:["cyberpunk","sci-fi","animation"],w:"Rotoscoped PKD paranoia. Formally unlike anything in your folder."},
+{c:"Series",t:"Better Call Saul",y:2015,s:88,g:["crime","prestige","drama"],w:"A meticulously built crime drama with exceptional character work."},
+{c:"Movie",t:"A Scanner Darkly",y:2006,s:88,g:["cyberpunk","sci-fi","animation"],w:"Rotoscoped PKD paranoia with a formally distinctive visual style."},
 {c:"Movie",t:"Prisoners",y:2013,s:88,g:["thriller","crime","procedural"],w:"Villeneuve's bleakest. Same director as 2049, Dune and Sicario."},
 {c:"Book",t:"Children of Time",a:"Adrian Tchaikovsky",y:2015,s:88,g:["sci-fi","hard-sf"],w:"Deep-time evolution SF. Project Hail Mary's cerebral cousin."},
 {c:"Series",t:"Andor",y:2022,s:87,g:["sci-fi","thriller","prestige"],w:"Grounded, adult, procedural. Nothing like Rise of Skywalker."},
 {c:"Movie",t:"Dredd",y:2012,s:87,g:["cyberpunk","action"],w:"One tower, one bad day, staggering neon slow-motion. Underrated."},
-{c:"Movie",t:"The Host",y:2006,s:86,g:["kaiju","sci-fi","thriller"],w:"Bong Joon-ho kaiju. Sits exactly between Snowpiercer and your Godzilla shelf."},
+{c:"Movie",t:"The Host",y:2006,s:86,g:["kaiju","sci-fi","thriller"],w:"Bong Joon-ho's kaiju thriller, balancing social satire and monster-movie tension."},
 {c:"Movie",t:"Hell or High Water",y:2016,s:86,g:["thriller","crime","western"],w:"Written by Sicario's screenwriter. Same DNA, different key."},
 {c:"Movie",t:"Upgrade",y:2018,s:86,g:["cyberpunk","action","sci-fi"],w:"Lean body-augmentation revenge film. Edgerunners' plot in live action."},
 {c:"Movie",t:"Paprika",y:2006,s:86,g:["anime","sci-fi","animation"],w:"Satoshi Kon. The film Inception borrowed most of its imagery from."},
 {c:"Series",t:"Vinland Saga",y:2019,s:86,g:["anime","action","drama"],w:"Best-written anime of the last decade. Berserk and AoT lineage."},
-{c:"Book",t:"The Three-Body Problem",a:"Cixin Liu",y:2008,s:86,g:["sci-fi","hard-sf"],w:"Read it before the show if you can. The scale escalation is the point."},
-{c:"Movie",t:"Godzilla",y:1954,s:85,g:["kaiju","sci-fi"],w:"You have Shin, Minus One and the MonsterVerse. This is the origin, and it's a grief film."},
+{c:"Book",t:"The Three-Body Problem",a:"Cixin Liu",y:2008,s:86,g:["sci-fi","hard-sf"],w:"The novel rewards attention to its escalating sense of scale."},
+{c:"Movie",t:"Godzilla",y:1954,s:85,g:["kaiju","sci-fi"],w:"The original Godzilla is a foundational monster film and a powerful grief story."},
 {c:"Movie",t:"Zodiac",y:2007,s:85,g:["thriller","crime","procedural"],w:"Fincher's obsession procedural. Two and a half hours of nothing but process."},
-{c:"Movie",t:"Sunshine",y:2007,s:85,g:["sci-fi","hard-sf"],w:"Danny Boyle — he directed your 28 Days Later. Sun-diving hard SF."},
+{c:"Movie",t:"Sunshine",y:2007,s:85,g:["sci-fi","hard-sf"],w:"Danny Boyle's sun-diving hard science-fiction thriller."},
 {c:"Series",t:"Devs",y:2020,s:84,g:["sci-fi","thriller","cyberpunk"],w:"From the Ex Machina director. The closest TV analogue to that film."},
 {c:"Movie",t:"Perfect Blue",y:1997,s:84,g:["anime","thriller","animation"],w:"Satoshi Kon's identity-collapse thriller. Aronofsky lifted from it twice."},
 {c:"Movie",t:"Minority Report",y:2002,s:84,g:["cyberpunk","sci-fi","thriller"],w:"PKD adaptation with the best future-interface design in film."},
 {c:"Movie",t:"Moon",y:2009,s:84,g:["sci-fi","hard-sf"],w:"One man, one base, one idea. Ad Astra adjacent, better executed."},
 {c:"Movie",t:"Dark City",y:1998,s:84,g:["cyberpunk","sci-fi","noir"],w:"Came out a year before The Matrix and did some of it better."},
 {c:"Series",t:"Cowboy Bebop",y:1998,s:84,g:["anime","sci-fi","noir"],w:"Space-noir with the best soundtrack in anime. The 1998 series, not the remake."},
-{c:"Book",t:"The Martian",a:"Andy Weir",y:2011,s:84,g:["sci-fi","hard-sf"],w:"The one Weir you haven't read. Substantially denser than the film."},
+{c:"Book",t:"The Martian",a:"Andy Weir",y:2011,s:84,g:["sci-fi","hard-sf"],w:"A dense, problem-solving hard-science-fiction adventure."},
 {c:"Movie",t:"RoboCop",y:1987,s:83,g:["cyberpunk","action","satire"],w:"Verhoeven satire that's only gotten sharper. Corporate dystopia, done first."},
 {c:"Movie",t:"Wind River",y:2017,s:82,g:["thriller","crime","procedural"],w:"Completes the Sheridan trilogy with Sicario and Hell or High Water."},
-{c:"Movie",t:"Princess Mononoke",y:1997,s:82,g:["anime","animation","fantasy"],w:"You own Grave of the Fireflies. This is the other essential Ghibli."},
-{c:"Movie",t:"Senna",y:2010,s:82,g:["motorsport","documentary"],w:"Archive-only documentary. You own Rush and Ford v Ferrari."},
+{c:"Movie",t:"Princess Mononoke",y:1997,s:82,g:["anime","animation","fantasy"],w:"One of Studio Ghibli's essential films: mythic, beautiful, and emotionally direct."},
+{c:"Movie",t:"Senna",y:2010,s:82,g:["motorsport","documentary"],w:"An archive-driven motorsport documentary with exceptional race footage."},
 {c:"Movie",t:"Total Recall",y:1990,s:82,g:["sci-fi","action","cyberpunk"],w:"More PKD, more Verhoeven. Practical effects that still land."},
 {c:"Series",t:"Silo",y:2023,s:82,g:["sci-fi","thriller","post-apoc"],w:"Post-apocalyptic mystery box with real production weight. Fallout adjacent."},
-{c:"Series",t:"Invincible",y:2021,s:91,g:["animation","action","superhero","character-first"],w:"Adult superhero animation with real consequences, messy friendships, and escalating stakes. Dispatch is a strong confirmation that this is your lane."},
+{c:"Series",t:"Invincible",y:2021,s:91,g:["animation","action","superhero","character-first"],w:"Adult superhero animation with real consequences, messy friendships, and escalating stakes; a strong Dispatch-adjacent pick."},
 {c:"Series",t:"Steins;Gate",y:2011,s:82,g:["anime","sci-fi","cyberpunk"],w:"Time-travel plotting on par with Dark. Slow first four episodes, then it detonates."},
 {c:"Book",t:"Recursion",a:"Blake Crouch",y:2019,s:82,g:["sci-fi","thriller"],w:"Propulsive high-concept. Two nights, maximum."},
 {c:"Book",t:"The Peripheral",a:"William Gibson",y:2014,s:82,g:["cyberpunk","sci-fi"],w:"Late Gibson. Two futures, one telepresence link, zero hand-holding."},
 {c:"Series",t:"Fullmetal Alchemist: Brotherhood",y:2009,s:80,g:["anime","action","fantasy"],w:"The complete-story anime people mean when they say 'start here'."},
-{c:"Movie",t:"A Silent Voice",y:2016,s:80,g:["anime","animation","drama"],w:"If Your Name landed, this hits considerably harder."},
+{c:"Movie",t:"A Silent Voice",y:2016,s:80,g:["anime","animation","drama"],w:"A moving anime drama with an especially strong emotional payoff."},
 {c:"Movie",t:"The Raid",y:2011,s:80,g:["action","thriller"],w:"Purest action film of its decade. No plot to speak of, and it doesn't need one."},
-{c:"Movie",t:"Collateral",y:2004,s:80,g:["thriller","crime","noir"],w:"Michael Mann shooting night-time LA on early digital. Same craft as your Heat."},
+{c:"Movie",t:"Collateral",y:2004,s:80,g:["thriller","crime","noir"],w:"Michael Mann shooting night-time Los Angeles on early digital; a masterclass in neo-noir craft."},
 {c:"Movie",t:"Come and See",y:1985,s:80,g:["war","drama"],w:"The heaviest war film ever made. Watch it once, deliberately."},
 {c:"Movie",t:"Gattaca",y:1997,s:80,g:["sci-fi","drama"],w:"Quiet, idea-first SF. Genetic determinism, no action scenes."},
 {c:"Series",t:"Serial Experiments Lain",y:1998,s:80,g:["cyberpunk","anime","sci-fi"],w:"1998 anime that predicted the internet's psychology. Genuinely disorienting."},
 {c:"Book",t:"Roadside Picnic",a:"Strugatsky brothers",y:1972,s:80,g:["sci-fi","short"],w:"Short. The ancestor of Annihilation, STALKER and every 'Zone' story since."},
 {c:"Book",t:"Midnight in Chernobyl",a:"Adam Higginbotham",y:2019,s:80,g:["non-fiction","history"],w:"Corrects what the HBO series dramatised, and is somehow tenser."},
 {c:"Book",t:"A Scanner Darkly",a:"Philip K. Dick",y:1977,s:80,g:["cyberpunk","sci-fi"],w:"PKD's most personal book. Surveillance and self-erasure."},
-{c:"Movie",t:"Rebel Ridge",y:2024,s:78,g:["thriller","action","crime"],w:"Jeremy Saulnier — he made your Blue Ruin and Green Room."},
+{c:"Movie",t:"Rebel Ridge",y:2024,s:78,g:["thriller","action","crime"],w:"Jeremy Saulnier's tense action-crime thriller."},
 {c:"Movie",t:"The Raid 2",y:2014,s:78,g:["action","crime"],w:"Bigger, crime-epic scope. The kitchen fight is the reason."},
-{c:"Movie",t:"John Wick: Chapter 4",y:2023,s:78,g:["action"],w:"You stopped at Parabellum. This is the peak of the series' choreography."},
+{c:"Movie",t:"John Wick: Chapter 4",y:2023,s:78,g:["action"],w:"Often considered the peak of the series' choreography."},
 {c:"Series",t:"True Detective",y:2014,s:78,g:["crime","thriller","prestige"],w:"Season 1 only. Southern-gothic procedural with genuine dread."},
 {c:"Series",t:"Chainsaw Man",y:2022,s:78,g:["anime","action"],w:"Best-animated modern shonen. MAPPA, same studio as Attack on Titan's final seasons."},
 {c:"Series",t:"Star Wars: Visions",y:2021,s:78,g:["animation","anime","anthology"],w:"Anime studios given Star Wars and no rules. Shorts, so it's Love Death & Robots-shaped."},
@@ -270,21 +259,21 @@ const D=[
 {c:"Movie",t:"All Quiet on the Western Front",y:2022,s:76,g:["war","drama"],w:"The modern WWI companion piece to 1917."},
 {c:"Movie",t:"Ghost in the Shell 2: Innocence",y:2004,s:76,g:["cyberpunk","anime","animation"],w:"Slower and more beautiful than the first. Almost a tone poem."},
 {c:"Movie",t:"The Boy and the Heron",y:2023,s:76,g:["anime","animation","fantasy"],w:"Miyazaki's latest and most opaque."},
-{c:"Movie",t:"Good Time",y:2017,s:76,g:["thriller","crime"],w:"Safdie brothers — the same anxiety engine as your Uncut Gems."},
+{c:"Movie",t:"Good Time",y:2017,s:76,g:["thriller","crime"],w:"The Safdie brothers' relentless, anxiety-driven crime thriller."},
 {c:"Series",t:"The Terror",y:2018,s:76,g:["drama","thriller","prestige"],w:"Season 1 only. Chernobyl-grade slow institutional dread, in the Arctic."},
 {c:"Series",t:"Ergo Proxy",y:2006,s:76,g:["cyberpunk","anime","sci-fi"],w:"Domed-city post-apocalypse. Heavy, moody, philosophical."},
 {c:"Series",t:"3 Body Problem",y:2024,s:76,g:["sci-fi","thriller"],w:"Big-idea SF, made by the Game of Thrones showrunners."},
 {c:"Book",t:"Exhalation",a:"Ted Chiang",y:2019,s:76,g:["sci-fi","short-fiction"],w:"His second collection. 'The Merchant and the Alchemist's Gate' alone earns it."},
 {c:"Book",t:"Daemon",a:"Daniel Suarez",y:2006,s:76,g:["cyberpunk","thriller"],w:"Autonomous software runs an insurgency. Techno-thriller, plausibly built."},
-{c:"Movie",t:"Enemy",y:2013,s:74,g:["thriller","sci-fi"],w:"Villeneuve at his strangest. 90 minutes, one image you won't shake."},
+{c:"Movie",t:"Enemy",y:2013,s:74,g:["thriller","sci-fi"],w:"Villeneuve at his strangest: 90 minutes and one unforgettable image."},
 {c:"Movie",t:"Glass Onion",y:2022,s:74,g:["mystery","comedy"],w:"Knives Out sequel."},
-{c:"Movie",t:"Kong: Skull Island",y:2017,s:74,g:["kaiju","action"],w:"Completes your MonsterVerse run."},
+{c:"Movie",t:"Kong: Skull Island",y:2017,s:74,g:["kaiju","action"],w:"A colorful, self-contained MonsterVerse adventure."},
 {c:"Movie",t:"The Zone of Interest",y:2023,s:74,g:["war","drama"],w:"Formally radical Holocaust film. Pairs with Chernobyl's institutional horror."},
 {c:"Series",t:"Castlevania",y:2017,s:80,g:["animation","action","fantasy","character-first"],w:"Adult animated fantasy with a sardonic, combustible core trio. Arcane's rougher predecessor, and a better fit now that Dispatch landed."},
 {c:"Series",t:"Harley Quinn",y:2019,s:85,g:["animation","superhero","comedy","ensemble"],w:"Adult animated superhero chaos with fast banter and a real found-family arc. The closest TV match for Dispatch's irreverent comic-book energy."},
-{c:"Series",t:"The Legend of Vox Machina",y:2022,s:84,g:["animation","fantasy","comedy","ensemble"],w:"An adult animated party adventure: filthy jokes, genuine loyalty, and escalating emotional stakes. Strong Dispatch fit if you want another crew to live with."},
+{c:"Series",t:"The Legend of Vox Machina",y:2022,s:84,g:["animation","fantasy","comedy","ensemble"],w:"An adult animated party adventure with filthy jokes, genuine loyalty, and escalating emotional stakes. Strong Dispatch-adjacent crew dynamics."},
 {c:"Series",t:"Doom Patrol",y:2019,s:82,g:["superhero","comedy","ensemble","character-first"],w:"Broken superpowered misfits in a weird workplace-family. It earns its emotions underneath the absurdity — a live-action Dispatch-adjacent pick."},
-{c:"Series",t:"Secret Level",y:2024,s:66,g:["animation","anthology","sci-fi"],w:"Love Death & Robots' team doing game-world shorts. Spectacle over story — lowered since anthologies with a message didn't work for you."},
+{c:"Series",t:"Secret Level",y:2024,s:66,g:["animation","anthology","sci-fi"],w:"Love Death & Robots' team doing game-world shorts. Spectacle over story, with a lighter emphasis than character-driven entries."},
 {c:"Series",t:"Monster",y:2004,s:74,g:["anime","thriller","crime"],w:"Where Death Note fans go next. Slower, smarter, no supernatural crutch."},
 {c:"Book",t:"Command and Control",a:"Eric Schlosser",y:2013,s:74,g:["non-fiction","history"],w:"Nuclear near-misses. Oppenheimer's terrifying sequel."},
 {c:"Book",t:"The Road",a:"Cormac McCarthy",y:2006,s:74,g:["post-apoc","literary"],w:"Same author as No Country. Spare, and the bleakest thing on this page."},
@@ -294,8 +283,8 @@ const D=[
 {c:"Series",t:"Texhnolyze",y:2003,s:72,g:["cyberpunk","anime"],w:"The bleakest cyberpunk anime ever made. Barely any dialogue for four episodes."},
 {c:"Movie",t:"Predestination",y:2014,s:71,g:["sci-fi","thriller"],w:"Time-loop puzzle box that actually closes."},
 {c:"Movie",t:"Tron: Legacy",y:2010,s:70,g:["cyberpunk","sci-fi","action"],w:"Thin story, but the Daft Punk score and neon design are the whole point."},
-{c:"Movie",t:"Letters from Iwo Jima",y:2006,s:70,g:["war","drama"],w:"The other side of your Midway."},
-{c:"Movie",t:"Suzume",y:2022,s:70,g:["anime","animation","fantasy"],w:"Makoto Shinkai, same director as Your Name."},
+{c:"Movie",t:"Letters from Iwo Jima",y:2006,s:70,g:["war","drama"],w:"A complementary World War II drama told from a different perspective."},
+{c:"Movie",t:"Suzume",y:2022,s:70,g:["anime","animation","fantasy"],w:"A Makoto Shinkai fantasy drama with his signature visual style."},
 {c:"Series",t:"Made in Abyss",y:2017,s:70,g:["anime","fantasy","adventure"],w:"Looks cute. Is not. Berserk-grade cruelty under a cheerful art style."},
 {c:"Series",t:"The Pacific",y:2010,s:70,g:["war","prestige","drama"],w:"Band of Brothers' companion series. Grimmer, less loved, still excellent."},
 {c:"Series",t:"Fargo",y:2014,s:70,g:["crime","thriller","anthology"],w:"Anthology. Seasons 1 and 2 are the ones that matter."},
@@ -309,50 +298,45 @@ const D=[
 {c:"Movie",t:"Land of Mine",y:2015,s:66,g:["war","drama"],w:"Small, tense, post-WWII. German boys clearing Danish beaches."},
 {c:"Movie",t:"Primer",y:2004,s:66,g:["sci-fi","thriller"],w:"Deliberately impossible to follow first time. Made for $7,000."},
 {c:"Book",t:"Go Like Hell",a:"A.J. Baime",y:2009,s:66,g:["non-fiction","motorsport"],w:"The book behind Ford v Ferrari."},
-{c:"Series",t:"Generation Kill",y:2008,s:66,g:["war","prestige"],w:"Iraq miniseries from The Wire's team. Pairs directly with your Warfare."},
-{c:"Book",t:"The Right Stuff",a:"Tom Wolfe",y:1979,s:64,g:["non-fiction","space"],w:"You own Apollo 11. This is the prose equivalent."},
+{c:"Series",t:"Generation Kill",y:2008,s:66,g:["war","prestige"],w:"An Iraq War miniseries from The Wire's team, with an observational style."},
+{c:"Book",t:"The Right Stuff",a:"Tom Wolfe",y:1979,s:64,g:["non-fiction","space"],w:"A landmark nonfiction account of the early U.S. space program."},
 {c:"Movie",t:"Millennium Actress",y:2001,s:64,g:["anime","animation","drama"],w:"The warmest Satoshi Kon film. Time and memory folded together."},
 {c:"Movie",t:"Under the Skin",y:2013,s:62,g:["sci-fi","drama"],w:"Abstract, cold, divisive. Almost no dialogue."},
 {c:"Movie",t:"Jarhead",y:2005,s:62,g:["war","drama"],w:"The tonal opposite of Warfare — war as unbearable boredom."},
-{c:"Book",t:"Station Eleven",a:"Emily St. John Mandel",y:2014,s:62,g:["post-apoc","literary"],w:"Literary post-collapse. Much quieter than your usual register."},
-/* ============ EXPEDITION 33 SIGNAL — character-driven turn-based RPGs ============ */
-{c:"Game",m:"single",t:"Clair Obscur: Expedition 33",y:2025,s:100,g:["turn-based","rpg","character-first","narrative"],w:"Played and loved. This locks in the signal: stylish, character-driven RPGs with a focused story and rewarding turn-based combat belong at the top."},
-{c:"Game",m:"single",t:"Metaphor: ReFantazio",y:2024,s:98,g:["turn-based","rpg","fantasy","character-first"],w:"The strongest next match: a polished, mature fantasy road trip with a great party, a big political story, and deeply satisfying turn-based combat."},
-{c:"Game",m:"single",t:"Persona 5 Royal",y:2020,s:95,g:["turn-based","rpg","style","character-first"],w:"A long but unusually stylish turn-based RPG built around a lovable crew, social bonds, and one of the genre's best combat loops."},
-{c:"Game",m:"single",t:"Like a Dragon: Infinite Wealth",y:2024,s:92,g:["turn-based","rpg","comedy","character-first"],w:"Adult, heartfelt, and wildly funny. The turn-based fights and deeply likable party make it a strong fit if Expedition 33's cast was part of the hook."},
+{c:"Book",t:"Station Eleven",a:"Emily St. John Mandel",y:2014,s:62,g:["post-apoc","literary"],w:"A quiet, literary post-collapse novel."},
 /* ============ DISPATCH SIGNAL — choice-driven, adult genre crews ============ */
-{c:"Game",m:"single",t:"The Wolf Among Us",y:2013,s:96,g:["choice-driven","noir","fantasy","character-first"],w:"The closest game match: stylish adult genre fiction, sharp dialogue, a damaged protagonist, and choices that shape how people meet you. Play this first."},
-{c:"Game",m:"single",t:"Tales from the Borderlands",y:2014,s:95,g:["choice-driven","sci-fi","comedy","ensemble"],w:"A superb misfit crew, rapid-fire comedy, and choices that keep the relationships lively. Dispatch's workplace/team chemistry in a louder space-opera wrapper."},
-{c:"Game",m:"single",t:"Marvel's Guardians of the Galaxy",y:2021,s:93,g:["superhero","sci-fi","comedy","ensemble"],w:"A single-player superhero story that lives or dies on squad banter, loyalty, and emotional payoffs. If Dispatch made you love the crew, this is the obvious next play."},
-{c:"Game",m:"single",t:"Mass Effect Legendary Edition",y:2021,s:92,g:["sci-fi","choice-driven","ensemble","character-first"],w:"The definitive 'assemble a crew and make choices that matter' trilogy. Less comedic than Dispatch, but unmatched for relationships and consequences."},
-{c:"Game",m:"single",t:"Baldur's Gate 3",y:2023,s:91,g:["fantasy","choice-driven","ensemble","character-first"],w:"The modern high-water mark for companions, banter, and choices with consequences. A huge commitment, but tailor-made if Dispatch's relationships were the hook."},
+{c:"Game",m:"single",t:"The Wolf Among Us",y:2013,s:96,g:["choice-driven","noir","fantasy","character-first"],w:"Stylish adult genre fiction with sharp dialogue, a damaged protagonist, and choices with social consequences."},
+{c:"Game",m:"single",t:"Tales from the Borderlands",y:2014,s:95,g:["choice-driven","sci-fi","comedy","ensemble"],w:"A superb misfit crew, rapid-fire comedy, and choices that keep the relationships lively."},
+{c:"Game",m:"single",t:"Marvel's Guardians of the Galaxy",y:2021,s:93,g:["superhero","sci-fi","comedy","ensemble"],w:"A superhero story driven by squad banter, loyalty, and emotional payoffs."},
+{c:"Game",m:"single",t:"Mass Effect Legendary Edition",y:2021,s:92,g:["sci-fi","choice-driven","ensemble","character-first"],w:"The definitive 'assemble a crew and make choices that matter' trilogy, with exceptional relationships and consequences."},
+{c:"Game",m:"single",t:"Baldur's Gate 3",y:2023,s:91,g:["fantasy","choice-driven","ensemble","character-first"],w:"A high-water mark for companions, banter, and choices with consequences. A huge but rewarding commitment."},
+{c:"Game",m:"single",t:"Clair Obscur: Expedition 33",y:2025,s:90,g:["fantasy","turn-based","character-first","ensemble"],w:"A polished turn-based RPG with a focused party, dramatic stakes, and a deliberately paced single-player campaign."},
+{c:"Game",m:"single",t:"Disco Elysium",y:2019,s:89,g:["choice-driven","noir","dialogue","character-first"],w:"A dense detective RPG where the writing, role-playing choices, and strange world do nearly all the heavy lifting."},
 {c:"Game",m:"single",t:"Life is Strange",y:2015,s:87,g:["choice-driven","drama","character-first"],w:"More intimate and less funny, but one of the clearest games for character bonds and decisions that feel personal rather than mechanical."},
-{c:"Game",m:"single",t:"Midnight Suns",y:2022,s:86,g:["superhero","strategy","ensemble","character-first"],w:"Turn-based superhero tactics wrapped around surprisingly good hangouts with the team. The least cinematic game here, but perhaps the best pure 'superhero workplace' fit."},
-{c:"Game",m:"single",t:"Oxenfree",y:2016,s:83,g:["choice-driven","sci-fi","dialogue","character-first"],w:"Compact supernatural mystery built around natural, overlapping conversation. A good palate-cleanser when you want Dispatch-style dialogue without a 50-hour game."},
-/* ============ MULTIPLAYER — short sessions and clear co-op/team loops ============ */
-{c:"Game",m:"multi",t:"Rocket League",y:2015,s:86,g:["team-sport","matchmaking","short-sessions","social"],w:"Instantly legible 5-minute matches with flexible parties and no campaign grind. Great when you want one more game, not a second job."},
-{c:"Game",m:"multi",t:"Marvel Rivals",y:2024,s:84,g:["hero-shooter","team-shooter","matchmaking","free-to-play"],w:"A colorful 6v6 hero shooter with recognizable characters, quick matchmaking, and clear team roles. Best if you want a modern team-shooter night without an open-world sandbox."},
-{c:"Game",m:"multi",t:"Deep Rock Galactic",y:2020,s:82,g:["co-op","mission-based","social","drop-in"],w:"Four-player co-op with clear objectives, a genuinely useful class system, and a low-pressure drop-in loop. Less horror tension, more teamwork and mining chaos."},
-{c:"Game",m:"multi",t:"The Finals",y:2023,s:80,g:["team-shooter","matchmaking","short-sessions","free-to-play"],w:"Objective-based three-player shooter matches with spectacular destructible arenas. A focused session game with room for coordination but no need to build a permanent crew."},
-{c:"Game",m:"multi",t:"Party Animals",y:2023,s:78,g:["party","social","short-sessions","casual"],w:"Low-stakes physics party matches that work for a few friends or a casual group night. Communication helps, but the rules are easy to pick up."},
+{c:"Game",m:"single",t:"Midnight Suns",y:2022,s:86,g:["superhero","strategy","ensemble","character-first"],w:"Turn-based superhero tactics wrapped around surprisingly good hangouts with the team."},
+{c:"Game",m:"single",t:"Oxenfree",y:2016,s:83,g:["choice-driven","sci-fi","dialogue","character-first"],w:"Compact supernatural mystery built around natural, overlapping conversation."},
+/* ============ SOCIAL MULTIPLAYER — matchmade co-op and team games ============ */
+{c:"Game",m:"multi",t:"Helldivers 2",y:2024,s:94,g:["co-op","matchmaking","action","social"],w:"Drop-in four-player co-op with clear shared objectives. It is unusually good at making a quick squad feel like a team."},
+{c:"Game",m:"multi",t:"Deep Rock Galactic",y:2020,s:92,g:["co-op","matchmaking","sci-fi","social"],w:"Four-player co-op built around complementary classes and a famously welcoming player culture. A strong low-pressure way to meet people."},
+{c:"Game",m:"multi",t:"The Finals",y:2023,s:90,g:["team-shooter","matchmaking","social","free-to-play"],w:"Fast, destructible-arena teamwork with easy queueing. Best when you want shooter energy without committing to a huge campaign."},
+{c:"Game",m:"multi",t:"Overwatch 2",y:2022,s:88,g:["hero-shooter","team-shooter","matchmaking","free-to-play"],w:"Role-based team shooter with short matches and an immediate reason to communicate, coordinate, and improve."},
+{c:"Game",m:"multi",t:"Warframe",y:2013,s:86,g:["co-op","matchmaking","sci-fi","free-to-play"],w:"A deep, fast co-op action game with generous matchmaking and a large player community. Great if repetition and progression sound appealing."},
+{c:"Game",m:"multi",t:"Lethal Company",y:2023,s:84,g:["co-op","comedy","horror","social"],w:"Chaotic short co-op runs that generate easy conversation. Best with a small regular group rather than solo queueing."},
+{c:"Game",m:"multi",t:"Sea of Thieves",y:2020,s:82,g:["co-op","adventure","social","open-world"],w:"A relaxed crew game built around shared stories, voice chat, and long-form adventures. Open crews can be unpredictable but memorable."},
 {c:"Movie",t:"Le Mans",y:1971,s:58,g:["motorsport"],w:"Steve McQueen, almost no plot, real 1970 race footage. For the purist mood."}
 ];
 
 const HOT={Movie:4,Series:5,Book:4,Game:5};
-const CATS={Movie:{h:"Movies",n:"Cyberpunk and neon-noir moved to the top. Horror titles removed on request."},
-            Series:{h:"Series",n:"Adult animation, sharp ensemble chemistry, and superhero misfits climbed after Dispatch."},
-            Book:{h:"Books",n:"Goodreads links. Cyberpunk canon leads; you've cleared Weir except The Martian."},
-            Game:{h:"Games",n:"Expedition 33 confirmed the signal: polished, character-driven turn-based RPGs now lead. Live-service grinds, open-ended social sandboxes, and stress-horror co-op are deliberately de-prioritized."}};
-const GAME_MODE_INFO={
-  single:{h:"Single-player games",n:"Focused campaigns with memorable characters, narrative momentum, and satisfying solo play."},
-  multi:{h:"Multiplayer games",n:"Low-friction co-op, team, and party games with clear goals and short-to-medium sessions."}
-};
+const CATS={Movie:{h:"Movies",n:"Science fiction, animation, thrillers, crime, and action."},
+            Series:{h:"Series",n:"Adult animation, ensemble stories, and genre drama."},
+            Book:{h:"Books",n:"Cyberpunk, science fiction, and literary genre fiction."},
+            Game:{h:"Games",n:"Choice-driven stories, sharp humor, and ensemble casts."}};
 
 const el=s=>document.querySelector(s);
-const st={cat:"all",mode:"all",q:"",sort:"score",tags:new Set(),hide:false,done:new Set()};
+const st={cat:"all",gameMode:"single",q:"",sort:"score",tags:new Set(),hide:false,done:new Set()};
 
 /* ---------- persistence: localStorage, with graceful fallback ---------- */
-const KEY="jeff.watchlist.v4";
+const KEY="public-watchlist.v1";
 let store=null;
 try{ localStorage.setItem(KEY+".probe","1"); localStorage.removeItem(KEY+".probe"); store=localStorage; }
 catch(e){ store=null; }   // blocked (private mode / sandboxed frame) -> Export still works
@@ -360,12 +344,11 @@ catch(e){ store=null; }   // blocked (private mode / sandboxed frame) -> Export 
 (function load(){
   if(!store) return;
   try{
-    // Carry forward completed items and preferences from prior versions.
-    const o=JSON.parse(store.getItem(KEY)||store.getItem("jeff.watchlist.v3")||store.getItem("jeff.watchlist.v2")||"null"); if(!o) return;
+    const o=JSON.parse(store.getItem(KEY)||"null"); if(!o) return;
     st.done=new Set(o.done||[]);
     st.tags=new Set(o.tags||[]);
     if(o.cat) st.cat=o.cat;
-    if(o.mode) st.mode=o.mode;
+    if(o.gameMode==="single"||o.gameMode==="multi") st.gameMode=o.gameMode;
     if(o.sort) st.sort=o.sort;
     st.hide=!!o.hide;
   }catch(e){}
@@ -374,7 +357,7 @@ catch(e){ store=null; }   // blocked (private mode / sandboxed frame) -> Export 
 function save(){
   if(!store) return;
   try{ store.setItem(KEY,JSON.stringify(
-    {v:4,done:[...st.done],tags:[...st.tags],cat:st.cat,mode:st.mode,sort:st.sort,hide:st.hide,at:Date.now()}));
+    {v:4,done:[...st.done],tags:[...st.tags],cat:st.cat,gameMode:st.gameMode,sort:st.sort,hide:st.hide,at:Date.now()}));
   }catch(e){}
 }
 
@@ -399,7 +382,7 @@ function render(){
   const q=st.q.toLowerCase();
   let rows=D.filter(d=>{
     if(st.cat!=="all" && d.c!==st.cat) return false;
-    if(st.cat==="Game" && st.mode!=="all" && d.m!==st.mode) return false;
+    if(st.cat==="Game" && d.m!==st.gameMode) return false;
     if(st.tags.size && !d.g.some(g=>st.tags.has(g))) return false;
     if(st.hide && st.done.has(key(d))) return false;
     if(q){
@@ -418,7 +401,11 @@ function render(){
   groups.forEach(cat=>{
     const set=rows.filter(d=>d.c===cat);
     if(!set.length) return;
-    const info=cat==="Game" && st.cat==="Game" && st.mode!=="all" ? GAME_MODE_INFO[st.mode] : CATS[cat];
+    const info=cat==="Game"&&st.cat==="Game"
+      ? (st.gameMode==="single"
+          ? {h:"Single-player games",n:"Character-led games for a solo night in."}
+          : {h:"Multiplayer games",n:"Matchmade co-op and team games chosen for lower-friction social play."})
+      : CATS[cat];
     html+=`<h2>${info.h} <em>${set.length} title${set.length>1?"s":""}</em></h2>
            <p class="snote">${info.n}</p><div class="grid">`;
     set.forEach((d,i)=>{
@@ -451,14 +438,14 @@ function updProg(){
 
 function syncUI(){
   [...el("#segCat").children].forEach(b=>b.classList.toggle("on",b.dataset.cat===st.cat));
-  const modeEl=el("#segMode");
-  modeEl.hidden=st.cat!=="Game";
-  [...modeEl.children].forEach(b=>b.classList.toggle("on",b.dataset.mode===st.mode));
+  const gameModes=el("#segGameMode");
+  gameModes.hidden=st.cat!=="Game";
+  [...gameModes.children].forEach(b=>b.classList.toggle("on",b.dataset.gameMode===st.gameMode));
   el("#sortSel").value=st.sort;
   el("#hideDone").checked=st.hide;
   [...el("#chips").children].forEach(b=>b.classList.toggle("on",st.tags.has(b.dataset.tag)));
   const s=el("#saveState");
-  if(store){ s.textContent="Saved automatically in this browser — close the tab and your ticks stay put.";
+  if(store){ s.textContent="Saved automatically in this browser. Progress remains on this device.";
              s.style.color="var(--gr)"; }
   else{ s.textContent="Auto-save is blocked here. Open the file directly in Chrome or Edge, or use Export backup.";
         s.style.color="var(--am)"; }
@@ -477,12 +464,13 @@ el("#hideDone").addEventListener("change",e=>{st.hide=e.target.checked;render()}
 el("#segCat").addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b) return;
   st.cat=b.dataset.cat;
+  [...el("#segCat").children].forEach(x=>x.classList.toggle("on",x===b));
   syncUI(); render(); window.scrollTo({top:0});
 });
-el("#segMode").addEventListener("click",e=>{
+el("#segGameMode").addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b) return;
-  st.mode=b.dataset.mode;
-  syncUI(); render();
+  st.gameMode=b.dataset.gameMode;
+  syncUI(); render(); window.scrollTo({top:0});
 });
 el("#chips").addEventListener("click",e=>{
   const b=e.target.closest(".chip"); if(!b) return;
@@ -496,7 +484,7 @@ el("#expBtn").addEventListener("click",()=>{
     const blob=new Blob([JSON.stringify({done:[...st.done]},null,2)],{type:"application/json"});
     const a=document.createElement("a");
     a.href=URL.createObjectURL(blob); a.download="watchlist-progress.json"; a.click();
-  }catch(e){ alert("Download blocked here. Your ticks are still saved automatically."); }
+  }catch(e){ alert("Download blocked here. Browser-local progress remains saved on this device."); }
 });
 el("#impBtn").addEventListener("click",()=>el("#impFile").click());
 el("#impFile").addEventListener("change",e=>{

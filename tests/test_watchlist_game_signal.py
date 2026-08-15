@@ -1,33 +1,32 @@
-"""Source-level guardrails for Jeff's current game-preference signal."""
+"""Source-level guardrails for the public game-recommendations view."""
 from pathlib import Path
 import unittest
 
 
-PAGE = Path(__file__).resolve().parents[1] / "watchlist" / "index.html"
+PAGE = Path(__file__).resolve().parents[1] / "site" / "watchlist" / "index.html"
 
 
 class WatchlistGameSignalTests(unittest.TestCase):
     def setUp(self):
         self.source = PAGE.read_text(encoding="utf-8")
 
-    def test_games_reflect_expedition_33_signal(self):
+    def test_games_include_the_turn_based_recommendation(self):
         self.assertIn('t:"Clair Obscur: Expedition 33"', self.source)
-        self.assertIn('t:"Metaphor: ReFantazio"', self.source)
-        self.assertIn('t:"Persona 5 Royal"', self.source)
         self.assertIn('"turn-based"', self.source)
 
-    def test_game_category_explains_the_updated_preference(self):
-        self.assertIn('Expedition 33 confirmed', self.source)
-        self.assertIn('live-service grinds', self.source.lower())
+    def test_game_category_uses_general_public_copy(self):
+        self.assertIn('Character-led games for a solo night in.', self.source)
+        self.assertIn('Matchmade co-op and team games chosen for lower-friction social play.', self.source)
+        self.assertNotIn('built from your library', self.source.lower())
 
     def test_games_have_single_player_and_multiplayer_mode_tabs(self):
-        self.assertIn('id="segMode"', self.source)
-        self.assertIn('data-mode="single"', self.source)
-        self.assertIn('data-mode="multi"', self.source)
+        self.assertIn('id="segGameMode"', self.source)
+        self.assertIn('data-game-mode="single"', self.source)
+        self.assertIn('data-game-mode="multi"', self.source)
         self.assertIn('m:"single"', self.source)
         self.assertIn('m:"multi"', self.source)
-        self.assertIn('st.mode', self.source)
-        self.assertIn('jeff.watchlist.v4', self.source)
+        self.assertIn('st.gameMode', self.source)
+        self.assertIn('public-watchlist.v1', self.source)
         self.assertIn('Multiplayer', self.source)
 
 
