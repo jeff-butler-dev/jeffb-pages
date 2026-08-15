@@ -4,7 +4,7 @@ A public catalog of personal, browser-based pages, hosted on GitHub Pages.
 
 ## Pages
 
-- [Watchlist, Reading List & Games](./watchlist/) — ranked recommendations and progress tracking.
+- [Media Matchbook](./watchlist/) — transparent recommendations across films, series, books, and games; progress and local feedback refine the rankings.
 
 ## Publishing another page
 

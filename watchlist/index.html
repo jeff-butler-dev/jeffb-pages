@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Watchlist, Reading List &amp; Games — Ranked</title>
+<title>Media Matchbook — Recommendations for Jeff</title>
 <style>
   :root{
     color-scheme: dark;
@@ -103,6 +103,13 @@
   .go{align-self:center;background:var(--panel2);border:1px solid var(--line2);border-radius:6px;
     padding:7px 13px;font-size:12.5px;white-space:nowrap;transition:.15s}
   .go:hover{border-color:var(--cy);background:rgba(58,216,224,.1)}
+  .feedback{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+  .feedback button{background:transparent;border:1px solid var(--line2);color:var(--dim2);border-radius:4px;padding:3px 6px;font:11px inherit;cursor:pointer}
+  .feedback button:hover{border-color:var(--cy);color:var(--text)}
+  .feedback button.active-love{border-color:var(--mg);color:var(--mg)}
+  .feedback button.active-like{border-color:var(--gr);color:var(--gr)}
+  .feedback button.active-pass{border-color:var(--am);color:var(--am)}
+  details{margin-top:8px;color:var(--dim2);font-size:11.5px}summary{cursor:pointer;color:var(--dim)}
   .empty{color:var(--dim2);text-align:center;padding:50px 20px;font-size:14px}
 
   footer{color:var(--dim2);font-size:12px;text-align:center;padding:34px 22px 60px;
@@ -118,17 +125,13 @@
 
 <header>
   <div class="wrap">
-    <h1>Watchlist, Reading List &amp; Games — <span>ranked for you</span></h1>
-    <p class="sub">Built from your library, then re-weighted around what you said you loved:
-      <b style="color:var(--mg)">Blade Runner 2049</b>, <b style="color:var(--mg)">Cyberpunk: Edgerunners</b>, and
-      <b style="color:var(--mg)">early Love, Death &amp; Robots</b>, and <b style="color:var(--mg)">Dispatch</b>.
-      Character-first genre stories, adult animation, team chemistry, sharp comedy, and choices with consequences
-      now carry extra weight. Horror is removed, Black Mirror-style cautionary anthologies are down-weighted, and
-      everything you've seen or read is gone.</p>
+    <h1>Media Matchbook — <span>ranked for you</span></h1>
+    <p class="sub">One transparent recommendation engine for films, series, books, and games. It starts with durable taste signals:
+      <b style="color:var(--mg)">character-first genre worlds</b>, <b style="color:var(--mg)">adult animation</b>,
+      <b style="color:var(--mg)">great crews</b>, and <b style="color:var(--mg)">consequential choices</b>.</p>
     <p class="sub" style="margin-top:10px;color:var(--dim2);font-size:13px">
-      Reading of your taste: you want <b style="color:var(--dim)">worlds, characters, and a crew worth spending time with</b>,
-      not just thought experiments. Dispatch adds a clear signal for witty adult genre fiction, workplace/team dynamics,
-      and decisions that make relationships matter; Black Mirror's premise-then-punchline structure is still the part that didn't.</p>
+      Scores combine catalog confidence with explicit shared traits—world, characters, crew, mission focus, craft, and choices.
+      Tap <b>Love</b>, <b>Like</b>, or <b>Pass</b> on any title to refine related picks locally; every card shows its match breakdown.</p>
     <div class="prog">
       <span class="pnum" id="pTxt">0 of 0 done</span>
       <span class="bar"><i id="pBar"></i></span>
@@ -338,6 +341,15 @@ const D=[
 {c:"Movie",t:"Le Mans",y:1971,s:58,g:["motorsport"],w:"Steve McQueen, almost no plot, real 1970 race footage. For the purist mood."}
 ];
 
+const TRAITS={
+  world:{label:"big world",tags:["sci-fi","cyberpunk","fantasy","space","kaiju","post-apoc"]},
+  character:{label:"character-first",tags:["character-first","narrative","drama","noir","dialogue"]},
+  crew:{label:"great crew",tags:["ensemble","comedy","social","co-op"]},
+  mission:{label:"mission focus",tags:["space","hard-sf","procedural","war","crime","thriller"]},
+  craft:{label:"crafted animation",tags:["animation","anime","prestige","style"]},
+  choice:{label:"choices matter",tags:["choice-driven","turn-based","rpg","strategy"]}
+};
+const traitWeights={world:12,character:14,crew:11,mission:10,craft:8,choice:10};
 const HOT={Movie:4,Series:5,Book:4,Game:5};
 const CATS={Movie:{h:"Movies",n:"Cyberpunk and neon-noir moved to the top. Horror titles removed on request."},
             Series:{h:"Series",n:"Adult animation, sharp ensemble chemistry, and superhero misfits climbed after Dispatch."},
@@ -349,10 +361,10 @@ const GAME_MODE_INFO={
 };
 
 const el=s=>document.querySelector(s);
-const st={cat:"all",mode:"all",q:"",sort:"score",tags:new Set(),hide:false,done:new Set()};
+const st={cat:"all",mode:"all",q:"",sort:"score",tags:new Set(),hide:false,done:new Set(),feedback:{}};
 
 /* ---------- persistence: localStorage, with graceful fallback ---------- */
-const KEY="jeff.watchlist.v4";
+const KEY="jeff.matchbook.v5";
 let store=null;
 try{ localStorage.setItem(KEY+".probe","1"); localStorage.removeItem(KEY+".probe"); store=localStorage; }
 catch(e){ store=null; }   // blocked (private mode / sandboxed frame) -> Export still works
@@ -361,8 +373,9 @@ catch(e){ store=null; }   // blocked (private mode / sandboxed frame) -> Export 
   if(!store) return;
   try{
     // Carry forward completed items and preferences from prior versions.
-    const o=JSON.parse(store.getItem(KEY)||store.getItem("jeff.watchlist.v3")||store.getItem("jeff.watchlist.v2")||"null"); if(!o) return;
+    const o=JSON.parse(store.getItem(KEY)||store.getItem("jeff.watchlist.v4")||store.getItem("jeff.watchlist.v3")||store.getItem("jeff.watchlist.v2")||"null"); if(!o) return;
     st.done=new Set(o.done||[]);
+    st.feedback=o.feedback||{};
     st.tags=new Set(o.tags||[]);
     if(o.cat) st.cat=o.cat;
     if(o.mode) st.mode=o.mode;
@@ -374,7 +387,7 @@ catch(e){ store=null; }   // blocked (private mode / sandboxed frame) -> Export 
 function save(){
   if(!store) return;
   try{ store.setItem(KEY,JSON.stringify(
-    {v:4,done:[...st.done],tags:[...st.tags],cat:st.cat,mode:st.mode,sort:st.sort,hide:st.hide,at:Date.now()}));
+    {v:5,done:[...st.done],feedback:st.feedback,tags:[...st.tags],cat:st.cat,mode:st.mode,sort:st.sort,hide:st.hide,at:Date.now()}));
   }catch(e){}
 }
 
@@ -392,6 +405,11 @@ const link=d=> d.c==="Book"
   : {u:"https://www.youtube.com/results?search_query="+enc(d.t+" "+d.y+(d.c==="Series"?" series":"")+" trailer"),l:"Trailer"};
 
 const key=d=>d.c+"|"+d.t;
+function traitsFor(d){const r={};Object.entries(TRAITS).forEach(([name,trait])=>r[name]=d.g.some(tag=>trait.tags.includes(tag)));return r}
+function learnedTagWeights(){const r={};D.forEach(d=>{const f=st.feedback[key(d)],n=f==="love"?1.5:f==="like"?.65:f==="pass"?-1.7:0;if(n)d.g.forEach(tag=>r[tag]=(r[tag]||0)+n)});return r}
+function score(d){const traits=traitsFor(d),learned=learnedTagWeights();const explicit=Object.entries(traits).reduce((n,[name,on])=>n+(on?traitWeights[name]:0),0);const feedback=Math.max(-14,Math.min(14,d.g.reduce((n,tag)=>n+(learned[tag]||0)*1.35,0)));const own=st.feedback[key(d)]==="love"?8:st.feedback[key(d)]==="like"?3:st.feedback[key(d)]==="pass"?-24:0;return Math.max(1,Math.min(99,Math.round(42+d.s*.34+explicit+feedback+own)))}
+function reasonsFor(d){const r=Object.entries(traitsFor(d)).filter(([,on])=>on).map(([name])=>TRAITS[name].label);return r.length?r.slice(0,3):["adjacent genre fit"]}
+function setFeedback(k,value){st.feedback[k]=st.feedback[k]===value?"":value;if(!st.feedback[k])delete st.feedback[k];render()}
 
 function scoreClass(s){return s>=90?"s90":s>=80?"s80":s>=70?"s70":"s60"}
 
@@ -408,7 +426,7 @@ function render(){
     }
     return true;
   });
-  const cmp={score:(a,b)=>b.s-a.s||a.t.localeCompare(b.t),
+  const cmp={score:(a,b)=>score(b)-score(a)||a.t.localeCompare(b.t),
              title:(a,b)=>a.t.localeCompare(b.t),
              year:(a,b)=>b.y-a.y, yearOld:(a,b)=>a.y-b.y}[st.sort];
   rows.sort(cmp);
@@ -422,15 +440,18 @@ function render(){
     html+=`<h2>${info.h} <em>${set.length} title${set.length>1?"s":""}</em></h2>
            <p class="snote">${info.n}</p><div class="grid">`;
     set.forEach((d,i)=>{
-      const k=key(d), done=st.done.has(k), L=link(d);
+      const k=key(d), done=st.done.has(k), L=link(d), computed=score(d), feedback=st.feedback[k]||"";
       const hot = st.sort==="score" && !st.tags.size && !q && i<HOT[cat];
+      const reasons=reasonsFor(d);
       html+=`<div class="card ${done?"done":""} ${hot?"hot":""}">
         <label class="ck"><input type="checkbox" data-k="${k}" ${done?"checked":""}></label>
-        <div class="sc ${scoreClass(d.s)}"><b>${d.s}</b><small>match</small></div>
+        <div class="sc ${scoreClass(computed)}"><b>${computed}</b><small>match</small></div>
         <div>
           <div class="ti">${d.t}<span class="yr">${d.a?d.a+" · ":""}${d.y}</span></div>
           <div class="why">${d.w}</div>
-          <div class="tg">${d.g.map(g=>`<span class="${g==="cyberpunk"?"k":""}">${g}</span>`).join("")}</div>
+          <div class="tg"><span class="k">Why it fits</span>${reasons.map(r=>`<span>${r}</span>`).join("")}</div>
+          <details><summary>View match breakdown</summary>Catalog confidence + ${reasons.join(", ")}${feedback?" + your "+feedback+" feedback":""}.</details>
+          <div class="feedback" aria-label="Feedback for ${d.t}"><button data-feedback="love" data-k="${k}" class="${feedback==="love"?"active-love":""}">Love</button><button data-feedback="like" data-k="${k}" class="${feedback==="like"?"active-like":""}">Like</button><button data-feedback="pass" data-k="${k}" class="${feedback==="pass"?"active-pass":""}">Pass</button></div>
         </div>
         <a class="go" href="${L.u}" target="_blank" rel="noopener">${L.l} &rarr;</a>
       </div>`;
@@ -465,6 +486,10 @@ function syncUI(){
 }
 
 // ---- events
+el("#out").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-feedback]"); if(!b) return;
+  setFeedback(b.dataset.k,b.dataset.feedback);
+});
 el("#out").addEventListener("change",e=>{
   const cb=e.target.closest("input[type=checkbox]"); if(!cb) return;
   cb.checked?st.done.add(cb.dataset.k):st.done.delete(cb.dataset.k);
