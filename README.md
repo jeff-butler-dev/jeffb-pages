@@ -1,16 +1,17 @@
-# Jeff’s Pages
+# Personal Pages Catalog
 
-A public catalog of personal, browser-based pages, hosted on GitHub Pages.
+Public static-page catalog deployed with GitHub Pages.
 
-## Pages
+- Live site: `https://jeff-butler-dev.github.io/jeffb-pages/`
+- Deployable content: [`site/`](./site/)
+- Public publication rules: [`PUBLICATION_POLICY.md`](./PUBLICATION_POLICY.md)
 
-- [Watchlist, Reading List & Games](./watchlist/) — ranked recommendations and progress tracking.
+## Add a public page
 
-## Publishing another page
+1. Create `site/<page-name>/index.html`.
+2. Add a generic card to `site/index.html`.
+3. Run `python scripts/public_site_check.py` from the repository root.
+4. Manually review the diff against `PUBLICATION_POLICY.md`.
+5. Commit and push to `main`. The deployment workflow runs the same safety scan before publishing.
 
-1. Create a folder at the repository root, e.g. `my-page/`.
-2. Put a self-contained `index.html` in that folder.
-3. Add a card to the root `index.html` linking to `my-page/`.
-4. Commit and push to `main`; GitHub Pages publishes automatically.
-
-Do not put secrets, private account data, or copyrighted media files in this public repository.
+Do not place credentials or personal data in `site/`. The site is public and the current GitHub Pages hostname contains the GitHub account name.

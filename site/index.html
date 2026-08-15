@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline'">
+  <title>Personal Pages · Command Center</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #e8edf3;
+      --muted: #94a0ae;
+      --faint: #647181;
+      --canvas: #090c11;
+      --surface: #111720;
+      --surface-raised: #151d28;
+      --line: #263241;
+      --line-bright: #3a4a5d;
+      --cyan: #57dce0;
+      --green: #85d6a8;
+      --amber: #dfb66b;
+      --focus: 0 0 0 3px rgba(87, 220, 224, .24);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--canvas); }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(900px 360px at 9% -9%, rgba(87, 220, 224, .11), transparent 61%),
+        radial-gradient(640px 260px at 94% 3%, rgba(123, 145, 255, .07), transparent 67%),
+        var(--canvas);
+      color: var(--ink);
+      font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; }
+    .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    .eyebrow, .label, .section-kicker {
+      margin: 0;
+      color: var(--cyan);
+      font: 700 11px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .topbar {
+      border-bottom: 1px solid rgba(58, 74, 93, .72);
+      background: rgba(9, 12, 17, .78);
+    }
+    .topbar .shell { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 49px; }
+    .status { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; }
+    .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(133, 214, 168, .1); }
+    .topbar a { color: var(--muted); font-size: 12px; text-decoration-color: rgba(148, 160, 174, .45); text-underline-offset: 3px; }
+    .topbar a:hover { color: var(--ink); }
+
+    header { padding: clamp(44px, 7vw, 78px) 0 35px; }
+    h1 { max-width: 830px; margin: 9px 0 12px; font-size: clamp(2.3rem, 6vw, 4.8rem); line-height: .98; letter-spacing: -.065em; }
+    h1 span { color: var(--cyan); }
+    .intro { max-width: 665px; margin: 0; color: var(--muted); font-size: clamp(1rem, 1.8vw, 1.12rem); }
+
+    .overview { display: grid; grid-template-columns: 1.15fr repeat(3, .72fr); gap: 10px; margin: 20px 0 48px; }
+    .metric {
+      min-height: 126px;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: linear-gradient(145deg, rgba(21, 29, 40, .96), rgba(13, 18, 25, .96));
+    }
+    .metric .label { color: var(--faint); }
+    .value { margin: 14px 0 2px; font-size: 30px; line-height: 1; font-weight: 720; letter-spacing: -.055em; font-variant-numeric: tabular-nums; }
+    .metric:first-child .value { color: var(--cyan); }
+    .metric p:last-child { margin: 7px 0 0; color: var(--muted); font-size: 12px; }
+
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 0 0 14px; }
+    h2 { margin: 5px 0 0; font-size: 21px; letter-spacing: -.035em; }
+    .section-head > p:last-child { margin: 0; color: var(--faint); font-size: 12px; }
+
+    .module-grid { display: grid; grid-template-columns: minmax(0, 1fr) 315px; gap: 12px; }
+    .module, .notice {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(17, 23, 32, .91);
+    }
+    .module { display: block; min-height: 260px; padding: 24px; text-decoration: none; transition: border-color .16s ease, transform .16s ease, background .16s ease; }
+    .module:hover { transform: translateY(-2px); border-color: var(--cyan); background: var(--surface-raised); }
+    .module:focus-visible, .topbar a:focus-visible { outline: none; box-shadow: var(--focus); }
+    .module-title { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin: 15px 0 9px; }
+    .module h3 { margin: 0; font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: -.045em; }
+    .route { color: var(--cyan); font: 600 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: nowrap; }
+    .module > p { max-width: 670px; margin: 0; color: var(--muted); }
+    .capabilities { display: flex; flex-wrap: wrap; gap: 7px; margin: 25px 0 22px; padding: 0; list-style: none; }
+    .capabilities li { padding: 4px 8px; border: 1px solid var(--line-bright); border-radius: 5px; color: var(--muted); font: 11px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .open { color: var(--cyan); font-weight: 700; }
+
+    .notice { padding: 22px; }
+    .notice h3 { margin: 13px 0 8px; font-size: 16px; letter-spacing: -.02em; }
+    .notice p { margin: 0; color: var(--muted); font-size: 13px; }
+    .notice hr { height: 1px; margin: 20px 0; border: 0; background: var(--line); }
+    .small-status { display: flex; align-items: center; gap: 9px; margin-top: 10px; color: var(--green); font: 600 11px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .05em; text-transform: uppercase; }
+    .small-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+    .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0 0; }
+    .fact { min-height: 122px; padding: 18px; border: 1px solid var(--line); border-radius: 10px; background: rgba(17, 23, 32, .65); }
+    .fact h3 { margin: 12px 0 5px; font-size: 14px; letter-spacing: -.015em; }
+    .fact p { margin: 0; color: var(--muted); font-size: 12px; }
+    .fact:nth-child(2) .section-kicker { color: var(--green); }
+    .fact:nth-child(3) .section-kicker { color: var(--amber); }
+
+    footer { display: flex; justify-content: space-between; gap: 18px; margin-top: 48px; padding: 21px 0 52px; border-top: 1px solid var(--line); color: var(--faint); font-size: 12px; }
+    footer p { margin: 0; }
+
+    @media (max-width: 800px) {
+      .overview { grid-template-columns: repeat(3, 1fr); }
+      .overview .metric:first-child { grid-column: 1 / -1; min-height: 105px; }
+      .module-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 28px, 1180px); }
+      .topbar .shell { min-height: 45px; }
+      .topbar a { display: none; }
+      header { padding-top: 45px; }
+      .overview { grid-template-columns: 1fr 1fr; margin-bottom: 38px; }
+      .overview .metric:first-child { grid-column: 1 / -1; }
+      .facts { grid-template-columns: 1fr; }
+      .section-head { align-items: start; flex-direction: column; gap: 6px; }
+      .module { min-height: 0; padding: 20px; }
+      .module-title { align-items: start; flex-direction: column; gap: 7px; }
+      footer { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <div class="status"><span class="pulse" aria-hidden="true"></span>Public catalog online</div>
+      <a href="watchlist/">Open the collection</a>
+    </div>
+  </div>
+
+  <main class="shell">
+    <header>
+      <p class="eyebrow">Public command center</p>
+      <h1>One place to <span>orient.</span></h1>
+      <p class="intro">A compact directory for the public tools and collections available here, with enough context to choose the right destination before opening it.</p>
+    </header>
+
+    <section class="overview" aria-label="Catalog overview">
+      <article class="metric">
+        <p class="label">Available module</p>
+        <p class="value">01</p>
+        <p>Interactive collection</p>
+      </article>
+      <article class="metric">
+        <p class="label">Catalog entries</p>
+        <p class="value">141</p>
+        <p>Across four media types</p>
+      </article>
+      <article class="metric">
+        <p class="label">Storage</p>
+        <p class="value">Local</p>
+        <p>Browser-only progress</p>
+      </article>
+      <article class="metric">
+        <p class="label">Network calls</p>
+        <p class="value">0</p>
+        <p>No tracking or remote feed</p>
+      </article>
+    </section>
+
+    <section aria-labelledby="modules-heading">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Modules</p>
+          <h2 id="modules-heading">Available now</h2>
+        </div>
+        <p>Static, browser-first, and portable.</p>
+      </div>
+
+      <div class="module-grid">
+        <a class="module" href="watchlist/" aria-label="Open Watchlist, Reading List and Games">
+          <p class="section-kicker">Collection · 141 entries</p>
+          <div class="module-title">
+            <h3>Watchlist, Reading List &amp; Games</h3>
+            <span class="route">/watchlist</span>
+          </div>
+          <p>A ranked set of films, series, books, and games. Search the catalog, narrow by type or tag, and retain progress in the current browser.</p>
+          <ul class="capabilities" aria-label="Available features">
+            <li>SEARCH</li><li>FILTERS</li><li>RANKING</li><li>LOCAL PROGRESS</li><li>EXPORT</li>
+          </ul>
+          <span class="open">Open collection →</span>
+        </a>
+
+        <aside class="notice" aria-label="Privacy posture">
+          <p class="section-kicker">Data boundary</p>
+          <h3>Public by design</h3>
+          <p>This catalog intentionally contains no live account data, private usage telemetry, credentials, or personal records.</p>
+          <div class="small-status">Public-safe surface</div>
+          <hr>
+          <p class="section-kicker">Interaction</p>
+          <h3>Progress stays in-browser</h3>
+          <p>Ticks and filters are saved locally when browser storage is available. Export provides a portable backup.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="facts" aria-label="Module notes">
+      <article class="fact">
+        <p class="section-kicker">Scope</p>
+        <h3>Films, series, books, games</h3>
+        <p>Four media categories, ranked to make the next choice faster.</p>
+      </article>
+      <article class="fact">
+        <p class="section-kicker">Persistence</p>
+        <h3>Controlled by the browser</h3>
+        <p>No account is needed to filter, check off, export, or restore progress.</p>
+      </article>
+      <article class="fact">
+        <p class="section-kicker">Links</p>
+        <h3>Useful external starting points</h3>
+        <p>Title links open search pages rather than depending on fragile deep links.</p>
+      </article>
+    </section>
+
+    <footer>
+      <p>Personal Pages · public catalog</p>
+      <p>Built as a minimal, privacy-first directory.</p>
+    </footer>
+  </main>
+</body>
+</html>

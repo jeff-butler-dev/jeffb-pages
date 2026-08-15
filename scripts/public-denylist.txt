@@ -1,0 +1,5 @@
+# Terms that must never be published in deployable Pages assets.
+# Lowercase matching is used. Add only specific personal identifiers, never general words.
+jeff
+butler
+jeff-butler-dev
