@@ -53,6 +53,7 @@
     padding:9px 10px;border-radius:7px;font:13.5px inherit;font-family:inherit;cursor:pointer}
   select:focus{outline:none;border-color:var(--cy)}
   .seg{display:flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden}
+  #segMode[hidden]{display:none!important}
   .seg button{background:var(--panel);border:0;border-right:1px solid var(--line2);color:var(--dim);
     padding:9px 15px;font:13.5px inherit;font-family:inherit;cursor:pointer;transition:.15s}
   .seg button:last-child{border-right:0}
@@ -94,6 +95,7 @@
   .sc small{font-size:9.5px;letter-spacing:.06em;color:var(--dim2);text-transform:uppercase}
   .s90 b{color:var(--cy)} .s80 b{color:var(--gr)} .s70 b{color:var(--am)} .s60 b{color:var(--dim)}
   .ti{font-weight:620;font-size:15px}
+  .medium{display:inline-block;margin-right:6px;border:1px solid var(--line2);border-radius:4px;padding:1px 5px;color:var(--vi);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;vertical-align:1px}
   .yr{color:var(--dim2);font-weight:400;font-size:13px;margin-left:6px}
   .why{color:var(--dim);font-size:13.2px;margin-top:3px}
   .tg{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
@@ -444,10 +446,10 @@ function render(){
       const hot = st.sort==="score" && !st.tags.size && !q && i<HOT[cat];
       const reasons=reasonsFor(d);
       html+=`<div class="card ${done?"done":""} ${hot?"hot":""}">
-        <label class="ck"><input type="checkbox" data-k="${k}" ${done?"checked":""}></label>
+        <label class="ck"><input type="checkbox" data-k="${k}" aria-label="Mark ${d.t} ${d.c==="Book"?"read":d.c==="Game"?"played":"watched"}" ${done?"checked":""}></label>
         <div class="sc ${scoreClass(computed)}"><b>${computed}</b><small>match</small></div>
         <div>
-          <div class="ti">${d.t}<span class="yr">${d.a?d.a+" · ":""}${d.y}</span></div>
+          <div class="ti"><span class="medium">${d.c}${d.m?" · "+d.m:""}</span>${d.t}<span class="yr">${d.a?d.a+" · ":""}${d.y}</span></div>
           <div class="why">${d.w}</div>
           <div class="tg"><span class="k">Why it fits</span>${reasons.map(r=>`<span>${r}</span>`).join("")}</div>
           <details><summary>View match breakdown</summary>Catalog confidence + ${reasons.join(", ")}${feedback?" + your "+feedback+" feedback":""}.</details>
@@ -471,10 +473,10 @@ function updProg(){
 }
 
 function syncUI(){
-  [...el("#segCat").children].forEach(b=>b.classList.toggle("on",b.dataset.cat===st.cat));
+  [...el("#segCat").children].forEach(b=>{const on=b.dataset.cat===st.cat;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
   const modeEl=el("#segMode");
   modeEl.hidden=st.cat!=="Game";
-  [...modeEl.children].forEach(b=>b.classList.toggle("on",b.dataset.mode===st.mode));
+  [...modeEl.children].forEach(b=>{const on=b.dataset.mode===st.mode;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
   el("#sortSel").value=st.sort;
   el("#hideDone").checked=st.hide;
   [...el("#chips").children].forEach(b=>b.classList.toggle("on",st.tags.has(b.dataset.tag)));

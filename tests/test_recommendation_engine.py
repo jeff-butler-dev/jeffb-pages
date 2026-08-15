@@ -29,6 +29,14 @@ class RecommendationEngineTests(unittest.TestCase):
         for category in ('Movie', 'Series', 'Book', 'Game'):
             self.assertIn(f'c:"{category}"', self.source)
 
+    def test_hides_contextual_game_modes_and_announces_segment_selection(self):
+        self.assertIn('#segMode[hidden]{display:none!important}', self.source.replace(' ', ''))
+        self.assertIn('aria-pressed', self.source)
+
+    def test_cards_expose_medium_and_actions_have_accessible_names(self):
+        self.assertIn('class="medium"', self.source)
+        self.assertIn('aria-label="Mark ${d.t}', self.source)
+
 
 if __name__ == "__main__":
     unittest.main()
